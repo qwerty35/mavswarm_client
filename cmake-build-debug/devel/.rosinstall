@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/devel/setup.sh

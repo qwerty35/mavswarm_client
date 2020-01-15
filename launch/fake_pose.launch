@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="pose_topic_name" default = "/vicon/cf1/cf1"/>
+
+    <!--mav gcs-->
+    <node name="fake_pose_node" pkg="mavswarm_client" type="fake_pose_node">
+        <param name="pose_topic_name" value="$(arg pose_topic_name)"/>         
+    </node>
+</launch>

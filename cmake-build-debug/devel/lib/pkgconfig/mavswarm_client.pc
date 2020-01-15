@@ -1,0 +1,8 @@
+prefix=/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/devel
+
+Name: mavswarm_client
+Description: Description of mavswarm_client
+Version: 0.0.0
+Cflags: -I/home/jungwon/catkin_ws/src/mavswarm_client/include
+Libs: -L/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/devel/lib -lcrazyflie_cpp
+Requires: 
