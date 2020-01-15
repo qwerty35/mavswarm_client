@@ -298,7 +298,8 @@ bool Crazyradio::receivePacket(
         return false;
     }
     if (status != LIBUSB_SUCCESS) {
-        throw std::runtime_error(libusb_error_name(status));
+//        throw std::runtime_error(libusb_error_name(status));
+        return false;
     }
     length = transferred - 1;
 

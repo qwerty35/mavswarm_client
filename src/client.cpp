@@ -70,6 +70,7 @@ Client::Client(
             m_radio->setArc(0);
             m_radio->setChannel(m_channel);
             m_radio->setAddress(m_address);
+            m_radio->setMode(m_radio->Mode_PRX);
         }
     }
 }
