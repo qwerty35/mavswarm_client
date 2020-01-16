@@ -302,31 +302,31 @@ bool Crazyradio::receivePacket(
     }
     length = transferred;
 
-    // Send ack
-    ITransport::Ack ack(1, 32);
-    ack.data[0] = 0x22; //console ack
-    ack.data[1] = 0x23;
-
-    uint8_t * debug = reinterpret_cast<uint8_t *>(&ack);
-
-    status = libusb_bulk_transfer(
-            m_handle,
-            /* endpoint*/ (0x01 | LIBUSB_ENDPOINT_OUT),
-            reinterpret_cast<uint8_t *>(&ack),
-            sizeof(ack),
-            &transferred,
-            /*timeout*/ 100);
-    // if (status == LIBUSB_ERROR_TIMEOUT) {
-    //     return;
-    // }
-    if (status != LIBUSB_SUCCESS) {
-        throw std::runtime_error(libusb_error_name(status));
-    }
-    if (sizeof(ack) != (uint32_t) transferred) {
-        std::stringstream sstr;
-        sstr << "Did transfer " << transferred << " but " << sizeof(ack) << " was requested!";
-        throw std::runtime_error(sstr.str());
-    }
+//    // Send ack
+//    ITransport::Ack ack(1, 32);
+//    ack.data[0] = 0x22; //console ack
+//    ack.data[1] = 0x23;
+//
+//    uint8_t * debug = reinterpret_cast<uint8_t *>(&ack);
+//
+//    status = libusb_bulk_transfer(
+//            m_handle,
+//            /* endpoint*/ (0x01 | LIBUSB_ENDPOINT_OUT),
+//            reinterpret_cast<uint8_t *>(&ack),
+//            sizeof(ack),
+//            &transferred,
+//            /*timeout*/ 100);
+//    // if (status == LIBUSB_ERROR_TIMEOUT) {
+//    //     return;
+//    // }
+//    if (status != LIBUSB_SUCCESS) {
+//        throw std::runtime_error(libusb_error_name(status));
+//    }
+//    if (sizeof(ack) != (uint32_t) transferred) {
+//        std::stringstream sstr;
+//        sstr << "Did transfer " << transferred << " but " << sizeof(ack) << " was requested!";
+//        throw std::runtime_error(sstr.str());
+//    }
 
     return true;
 }

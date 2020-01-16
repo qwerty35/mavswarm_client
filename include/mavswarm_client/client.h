@@ -29,6 +29,6 @@ private:
     uint64_t m_address;
     Crazyradio::Datarate m_datarate;
 
-    void handleData(const uint8_t* data, uint32_t length, ITransport::Ack& ack);
+    void handleData(const uint8_t* data, uint8_t* ack, uint32_t& ack_size);
 };
 

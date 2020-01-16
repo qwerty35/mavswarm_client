@@ -97,22 +97,23 @@ void Client::listen() {
     ROS_INFO_STREAM(sstr.str());
 
     // handle data
-//    ITransport::Ack ack(1, 31);
-//    handleData(data, length, ack);
-//    m_radio->sendPacketNoAck((uint8_t*)&ack, sizeof(ack));
-
-
+    uint8_t ack[32];
+    uint32_t ack_size;
+    handleData(data, length, ack);
+    m_radio->sendPacketNoAck((uint8_t*)&ack, sizeof(ack));
 }
 
-void Client::handleData(const uint8_t* data, uint32_t length, ITransport::Ack& ack){
+void Client::handleData(const uint8_t* data, uint8_t* ack, uint32_t& ack_size){
     crtp data_crtp = crtp(data[0]);
 
     // ping
     if(data_crtp == crtp(15, 3)) {
-        ack.data[0] = 0x22; //console ack
+        ack[0] = 0x22; //console ack
+        ack_size = 4;
     }
     else if(data_crtp == crtp(5, 1)){
-        ack.data[0] = 0x22;
+        ack[0] = 0x22;
+        ack_size = 4;
     }
 
 
