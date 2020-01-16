@@ -8,6 +8,8 @@
 #include "Crazyradio.h"
 #include "CrazyflieUSB.h"
 
+#include <ros/console.h>
+#include <sstream>
 #include <fstream>
 #include <cstring>
 #include <stdexcept>
@@ -75,13 +77,44 @@ Client::Client(
     }
 }
 
-void Client::waitMessage() {
+void Client::listen() {
     uint8_t* data;
     uint32_t length;
-    while(m_radio->receivePacket(data, length) == false) {
+    data = new uint8_t[32];
+
+    // wait for packet
+    while(!m_radio->receivePacket(data, length)){
 
     }
 
-    int debug = 0;
+    std::stringstream sstr;
+    sstr << "data: ";
+    for(int i = 0; i < length; i++){
+        sstr << (int)data[i] << " ";
+    }
+    sstr << ", length: " << length;
+
+    ROS_INFO_STREAM(sstr.str());
+
+    // handle data
+//    ITransport::Ack ack(1, 31);
+//    handleData(data, length, ack);
+//    m_radio->sendPacketNoAck((uint8_t*)&ack, sizeof(ack));
+
+
+}
+
+void Client::handleData(const uint8_t* data, uint32_t length, ITransport::Ack& ack){
+    crtp data_crtp = crtp(data[0]);
+
+    // ping
+    if(data_crtp == crtp(15, 3)) {
+        ack.data[0] = 0x22; //console ack
+    }
+    else if(data_crtp == crtp(5, 1)){
+        ack.data[0] = 0x22;
+    }
+
+
 }
 

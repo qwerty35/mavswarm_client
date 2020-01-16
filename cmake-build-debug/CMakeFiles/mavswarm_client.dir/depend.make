@@ -36,6 +36,15 @@ CMakeFiles/mavswarm_client.dir/src/client.cpp.o: ../include/mavswarm_client/crtp
 CMakeFiles/mavswarm_client.dir/src/client.cpp.o: ../src/client.cpp
 CMakeFiles/mavswarm_client.dir/src/client.cpp.o: ../src/crtpBootloader.h
 CMakeFiles/mavswarm_client.dir/src/client.cpp.o: ../src/crtpNRF51.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/console.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/console_backend.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/duration.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/exception.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/macros.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/platform.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/rostime_decl.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/ros/time.h
+CMakeFiles/mavswarm_client.dir/src/client.cpp.o: /opt/ros/kinetic/include/rosconsole/macros_generated.h
 
 CMakeFiles/mavswarm_client.dir/src/crtp.cpp.o: ../include/mavswarm_client/Crazyradio.h
 CMakeFiles/mavswarm_client.dir/src/crtp.cpp.o: ../include/mavswarm_client/ITransport.h

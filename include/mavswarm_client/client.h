@@ -18,8 +18,7 @@ class Client {
 public:
     Client(const std::string& link_uri);
 
-    void waitMessage();
-    void AckDecision();
+    void listen();
     void publishVisionPose();
 private:
     Crazyradio* m_radio;
@@ -29,5 +28,7 @@ private:
     uint8_t m_channel;
     uint64_t m_address;
     Crazyradio::Datarate m_datarate;
+
+    void handleData(const uint8_t* data, uint32_t length, ITransport::Ack& ack);
 };
 
