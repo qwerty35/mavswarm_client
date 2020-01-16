@@ -17,6 +17,7 @@
 #include <cmath>
 #include <inttypes.h>
 #include <client.h>
+#include <crtp.h>
 
 
 const static int MAX_RADIOS = 1;
@@ -29,13 +30,17 @@ const static bool LOG_COMMUNICATION = 0;
 //std::mutex g_crazyflieusbMutex[MAX_USB];
 
 Client::Client(
+        ros::NodeHandle nh,
         const std::string& link_uri)
-        : m_radio(nullptr)
+        : m_rosNodeHandle(nh)
+        , m_radio(nullptr)
         , m_transport(nullptr)
         , m_devId(0)
         , m_channel(0)
         , m_address(0)
         , m_datarate(Crazyradio::Datarate_250KPS)
+        , m_pingPassed(false)
+        , m_count(0)
 {
     int datarate;
     int channel;
@@ -67,7 +72,7 @@ Client::Client(
         }
 
         {
-            m_radio = new Crazyradio(m_devId);
+            m_radio = new Crazyradio(0);
             m_radio->setAckEnable(true);
             m_radio->setArc(0);
             m_radio->setChannel(m_channel);
@@ -75,47 +80,72 @@ Client::Client(
             m_radio->setMode(m_radio->Mode_PRX);
         }
     }
+
+    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("/vicon/cf1/cf1", 5); //TODO: fix topic name
 }
 
 void Client::listen() {
-    uint8_t* data;
     uint32_t length;
-    data = new uint8_t[32];
+    uint8_t data[32];
 
     // wait for packet
-    while(!m_radio->receivePacket(data, length)){
+    while(ros::ok()){
+        m_radio->setAddress(m_address);
+        if(m_radio->receivePacket(data, length)) {
+            handleData(data);
+            break;
+        }
+        m_radio->setAddress(0xFFE7E7E7E7);
+        m_radio->setAckEnable(false);
+        if(m_radio->receivePacket(data, length)){
+            handleData(data);
+            break;
+        }
+    }
+}
 
+void Client::handleData(const uint8_t* data){
+    // external pose
+    if(crtp(data[0]) == crtp(6, 1)){
+        publishExternalPose(data);
+        return;
     }
 
-    std::stringstream sstr;
-    sstr << "data: ";
-    for(int i = 0; i < length; i++){
-        sstr << (int)data[i] << " ";
-    }
-    sstr << ", length: " << length;
-
-    ROS_INFO_STREAM(sstr.str());
-
-    // handle data
     uint8_t ack[32];
     uint32_t ack_size;
-    handleData(data, length, ack);
-    m_radio->sendPacketNoAck((uint8_t*)&ack, sizeof(ack));
-}
-
-void Client::handleData(const uint8_t* data, uint8_t* ack, uint32_t& ack_size){
-    crtp data_crtp = crtp(data[0]);
-
     // ping
-    if(data_crtp == crtp(15, 3)) {
+    if(crtp(data[0]) == crtp(15, 3)) {
         ack[0] = 0x22; //console ack
         ack_size = 4;
+
     }
-    else if(data_crtp == crtp(5, 1)){
-        ack[0] = 0x22;
+    // log reset
+    else if(crtp(data[0]) == crtp(5, 1)){
+        ack[0] = 0x51;
+        ack[1] = 0x05;
         ack_size = 4;
     }
-
-
+    // request memory
+    else if(crtp(data[0]) == crtp(4, 0)){
+        ack[0] = 0x40;
+        ack[1] = 0x01;
+        ack_size = 3;
+    }
+    m_radio->sendPacketNoAck((uint8_t*)&ack, ack_size);
 }
+
+void Client::publishExternalPose(const uint8_t* data) {
+    crtpExternalPosePacked* extPose_crtp = (crtpExternalPosePacked*)data;
+    for(int i = 0; i < 2; i++) {
+        if (m_devId == extPose_crtp->poses[i].id) {
+            geometry_msgs::PoseStamped extPose_msgs;
+            extPose_msgs.pose.position.x = (float)extPose_crtp->poses[i].x/1000;
+            extPose_msgs.pose.position.y = (float)extPose_crtp->poses[i].y/1000;
+            extPose_msgs.pose.position.z = (float)extPose_crtp->poses[i].z/1000;
+
+            m_pub_externalPose.publish(extPose_msgs);
+        }
+    }
+}
+
 

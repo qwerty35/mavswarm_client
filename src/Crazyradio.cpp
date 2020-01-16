@@ -291,9 +291,10 @@ bool Crazyradio::receivePacket(
             m_handle,
             /* endpoint*/ (0x81 | LIBUSB_ENDPOINT_IN),
             (uint8_t *) data,
-            sizeof(data)-1,
-            &transferred,
-            /*timeout*/ 10);
+            31,
+            &transferred
+            ,
+            /*timeout*/ 100);
     if (status == LIBUSB_ERROR_TIMEOUT) {
         return false;
     }

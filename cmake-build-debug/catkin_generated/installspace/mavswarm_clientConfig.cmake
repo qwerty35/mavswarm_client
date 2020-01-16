@@ -67,8 +67,8 @@ set(mavswarm_client_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(mavswarm_client_SOURCE_PREFIX /home/jungwon/catkin_ws/src/mavswarm_client)
-  set(mavswarm_client_DEVEL_PREFIX /home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/devel)
+  set(mavswarm_client_SOURCE_PREFIX /home/upboard1/catkin_ws/src/mavswarm_client)
+  set(mavswarm_client_DEVEL_PREFIX /home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/devel)
   set(mavswarm_client_INSTALL_PREFIX "")
   set(mavswarm_client_PREFIX ${mavswarm_client_DEVEL_PREFIX})
 else()
@@ -121,6 +121,8 @@ foreach(library ${libraries})
   # keep build configuration keywords, target names and absolute libraries as-is
   if("${library}" MATCHES "^(debug|optimized|general)$")
     list(APPEND mavswarm_client_LIBRARIES ${library})
+  elseif(${library} MATCHES "^-l")
+    list(APPEND mavswarm_client_LIBRARIES ${library})
   elseif(TARGET ${library})
     list(APPEND mavswarm_client_LIBRARIES ${library})
   elseif(IS_ABSOLUTE ${library})
@@ -129,7 +131,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /usr/local/lib;/home/jungwon/catkin_ws2/devel/lib;/home/jungwon/crazyswarm/ros_ws/devel/lib;/home/jungwon/catkin_ws/devel/lib;/opt/ros/kinetic/lib)
+    foreach(path /usr/local/lib;/home/upboard1/crazyswarm/ros_ws/devel/lib;/home/upboard1/catkin_ws/devel/lib;/opt/ros/kinetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

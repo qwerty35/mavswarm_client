@@ -1,4 +1,3 @@
-#include "ros/ros.h"
 #include <geometry_msgs/PoseStamped.h>
 #include "client.h"
 
@@ -7,9 +6,9 @@ int main(int argc, char **argv){
     ros::NodeHandle nh;
 
     std::string uri;
-    nh.param<std::string>("uri", uri, "radio://0/50/2M/E7E7E7E701");
+    nh.param<std::string>("uri", uri, "radio://1/50/2M/E7E7E7E701");
 
-    Client client(uri);
+    Client client(nh, uri);
 
     while(ros::ok()){
         client.listen();

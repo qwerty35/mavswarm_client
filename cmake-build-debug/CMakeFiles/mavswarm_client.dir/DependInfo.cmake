@@ -4,20 +4,22 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/Crazyflie.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/Crazyflie.cpp.o"
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/CrazyflieUSB.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/CrazyflieUSB.cpp.o"
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/Crazyradio.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/Crazyradio.cpp.o"
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/ITransport.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/ITransport.cpp.o"
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/USBDevice.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/USBDevice.cpp.o"
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/client.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/client.cpp.o"
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/crtp.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/crtp.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/Crazyflie.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/Crazyflie.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/CrazyflieUSB.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/CrazyflieUSB.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/Crazyradio.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/Crazyradio.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/ITransport.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/ITransport.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/USBDevice.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/USBDevice.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/client.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/client.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/crtp.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/crtp.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # Preprocessor definitions for this target.
 set(CMAKE_TARGET_DEFINITIONS_CXX
   "ROSCONSOLE_BACKEND_LOG4CXX"
+  "ROS_BUILD_SHARED_LIBS=1"
   "ROS_PACKAGE_NAME=\"mavswarm_client\""
+  "mavswarm_client_EXPORTS"
   )
 
 # The include file search paths:

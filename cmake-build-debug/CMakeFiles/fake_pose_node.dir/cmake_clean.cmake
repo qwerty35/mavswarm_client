@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/fake_pose_node.dir/src/fake_pose_node.cpp.o"
-  "devel/lib/mavswarm_client/fake_pose_node.pdb"
   "devel/lib/mavswarm_client/fake_pose_node"
+  "devel/lib/mavswarm_client/fake_pose_node.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

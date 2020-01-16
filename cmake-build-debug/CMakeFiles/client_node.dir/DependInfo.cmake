@@ -4,13 +4,14 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/jungwon/catkin_ws/src/mavswarm_client/src/client_node.cpp" "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/client_node.dir/src/client_node.cpp.o"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/src/client_node.cpp" "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/client_node.dir/src/client_node.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # Preprocessor definitions for this target.
 set(CMAKE_TARGET_DEFINITIONS_CXX
   "ROSCONSOLE_BACKEND_LOG4CXX"
+  "ROS_BUILD_SHARED_LIBS=1"
   "ROS_PACKAGE_NAME=\"mavswarm_client\""
   )
 
@@ -23,7 +24,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/jungwon/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/DependInfo.cmake"
+  "/home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/CMakeFiles/mavswarm_client.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

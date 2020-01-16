@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/client_node.dir/src/client_node.cpp.o"
-  "devel/lib/mavswarm_client/client_node.pdb"
   "devel/lib/mavswarm_client/client_node"
+  "devel/lib/mavswarm_client/client_node.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

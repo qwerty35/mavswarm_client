@@ -27,6 +27,10 @@ stdint.h
 -
 
 ../include/mavswarm_client/client.h
+ros/ros.h
+../include/mavswarm_client/ros/ros.h
+geometry_msgs/PoseStamped.h
+../include/mavswarm_client/geometry_msgs/PoseStamped.h
 cstring
 -
 sstream
@@ -54,13 +58,11 @@ Crazyradio.h
 cstdint
 -
 
-/home/jungwon/catkin_ws/src/mavswarm_client/src/client_node.cpp
-ros/ros.h
-/home/jungwon/catkin_ws/src/mavswarm_client/src/ros/ros.h
+/home/upboard1/catkin_ws/src/mavswarm_client/src/client_node.cpp
 geometry_msgs/PoseStamped.h
 -
 client.h
-/home/jungwon/catkin_ws/src/mavswarm_client/src/client.h
+/home/upboard1/catkin_ws/src/mavswarm_client/src/client.h
 
 /opt/ros/kinetic/include/geometry_msgs/Point.h
 string
