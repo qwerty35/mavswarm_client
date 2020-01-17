@@ -1,2 +1,0 @@
-- setup-file:
-    local-name: /home/upboard1/catkin_ws/src/mavswarm_client/cmake-build-debug/devel/setup.sh

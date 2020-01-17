@@ -31,17 +31,21 @@ const static bool LOG_COMMUNICATION = 0;
 
 Client::Client(
         ros::NodeHandle nh,
-        const std::string& link_uri)
+        const std::string& link_uri,
+        int mav_id)
         : m_rosNodeHandle(nh)
         , m_radio(nullptr)
         , m_transport(nullptr)
+        , m_mavId(mav_id)
         , m_devId(0)
         , m_channel(0)
         , m_address(0)
         , m_datarate(Crazyradio::Datarate_250KPS)
-        , m_pingPassed(false)
-        , m_count(0)
+        , m_frame_id("/world")
 {
+    m_rosNodeHandle.param<std::string>("frame_id", m_frame_id, "/world");
+    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("/mavswarm_client/mav" + std::to_string(m_mavId) + "/pose", 5);
+
     int datarate;
     int channel;
     char datarateType;
@@ -67,13 +71,13 @@ Client::Client(
             m_datarate = Crazyradio::Datarate_2MPS;
         }
 
-        if (m_devId > MAX_RADIOS) {
+        if (m_devId >= MAX_RADIOS) {
             throw std::runtime_error("This version does not support that many radios. Adjust MAX_RADIOS and recompile!");
         }
 
         {
-            m_radio = new Crazyradio(0);
-            m_radio->setAckEnable(true);
+            m_radio = new Crazyradio(m_devId);
+            m_radio->setAckEnable(false);
             m_radio->setArc(0);
             m_radio->setChannel(m_channel);
             m_radio->setAddress(m_address);
@@ -81,26 +85,26 @@ Client::Client(
         }
     }
 
-    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("/vicon/cf1/cf1", 5); //TODO: fix topic name
+
+
 }
 
-void Client::listen() {
+void Client::run() {
     uint32_t length;
     uint8_t data[32];
 
-    // wait for packet
     while(ros::ok()){
-        m_radio->setAddress(m_address);
-        if(m_radio->receivePacket(data, length)) {
-            handleData(data);
-            break;
+        // if there is no packet for both address, retry
+        // else handle data
+        m_radio->setAddress(0xFFE7E7E7E7); // broadcast address for external pose
+        if(!m_radio->receivePacket(data, length)) {
+            m_radio->setAddress(m_address); // mav address for ping check
+            if (!m_radio->receivePacket(data, length)) {
+                continue;
+            }
         }
-        m_radio->setAddress(0xFFE7E7E7E7);
-        m_radio->setAckEnable(false);
-        if(m_radio->receivePacket(data, length)){
-            handleData(data);
-            break;
-        }
+        handleData(data);
+//        ros::spinOnce();
     }
 }
 
@@ -112,7 +116,7 @@ void Client::handleData(const uint8_t* data){
     }
 
     uint8_t ack[32];
-    uint32_t ack_size;
+    uint32_t ack_size = 0;
     // ping
     if(crtp(data[0]) == crtp(15, 3)) {
         ack[0] = 0x22; //console ack
@@ -135,17 +139,44 @@ void Client::handleData(const uint8_t* data){
 }
 
 void Client::publishExternalPose(const uint8_t* data) {
-    crtpExternalPosePacked* extPose_crtp = (crtpExternalPosePacked*)data;
+    auto extPose_crtp = (crtpExternalPosePacked*)data;
     for(int i = 0; i < 2; i++) {
-        if (m_devId == extPose_crtp->poses[i].id) {
+        if (m_mavId == extPose_crtp->poses[i].id) {
             geometry_msgs::PoseStamped extPose_msgs;
+            extPose_msgs.header.frame_id = m_frame_id;
+            extPose_msgs.header.stamp = ros::Time::now();
+
             extPose_msgs.pose.position.x = (float)extPose_crtp->poses[i].x/1000;
             extPose_msgs.pose.position.y = (float)extPose_crtp->poses[i].y/1000;
             extPose_msgs.pose.position.z = (float)extPose_crtp->poses[i].z/1000;
 
+            float q[4];
+            quatextract(extPose_crtp->poses[i].quat, q);
+            extPose_msgs.pose.orientation.x = q[0];
+            extPose_msgs.pose.orientation.y = q[1];
+            extPose_msgs.pose.orientation.z = q[2];
+            extPose_msgs.pose.orientation.w = q[3];
+
             m_pub_externalPose.publish(extPose_msgs);
         }
     }
+}
+
+void Client::quatextract(uint32_t quat, float* q){
+    float ssum = 0;
+
+    int i_largest = quat >> 30;
+    for(int i = 3; i >= 0; i--){
+        if(i != i_largest){
+            unsigned negbit = quat >> 9 & 0x01;
+            unsigned mag = quat & ((1 << 9) - 1);
+            quat = quat >> 10;
+
+            q[i] = (negbit ? -1.0f : 1.0f) * (float)mag * (float)M_SQRT1_2 / (float)((1 << 9) - 1);
+            ssum += q[i] * q[i];
+        }
+    }
+    q[i_largest] = sqrt(1 - ssum);
 }
 
 

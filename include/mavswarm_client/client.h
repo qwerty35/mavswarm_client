@@ -18,25 +18,27 @@
 
 class Client {
 public:
-    Client(ros::NodeHandle nh, const std::string& link_uri);
+    Client(ros::NodeHandle nh, const std::string& link_uri, int dev_id);
 
-    void listen();
-    void publishVisionPose();
+    void run();
 private:
+    int m_mavId;
+
+    // ros
     ros::NodeHandle m_rosNodeHandle;
     ros::Publisher m_pub_externalPose;
+    std::string m_frame_id;
 
+    // crazyradio
     Crazyradio* m_radio;
-    ITransport* m_transport;
     int m_devId;
-
+    ITransport* m_transport;
     uint8_t m_channel;
     uint64_t m_address;
     Crazyradio::Datarate m_datarate;
-    bool m_pingPassed;
-    int m_count;
 
     void handleData(const uint8_t* data);
     void publishExternalPose(const uint8_t* data);
+    void quatextract(uint32_t quat, float* q);
 };
 
