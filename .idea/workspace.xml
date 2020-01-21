@@ -40,30 +40,8 @@
     <list default="true" id="86116c36-1d19-4fd1-a0cd-bd5bea54a61b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/client_node.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/client_node.dir/flags.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/client_node.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/client_node.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/client_node.dir/src/client_node.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/client_node.dir/src/client_node.cpp.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/fake_pose_node.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/fake_pose_node.dir/flags.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/fake_pose_node.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/fake_pose_node.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mavswarm_client.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mavswarm_client.dir/flags.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mavswarm_client.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mavswarm_client.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/client.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mavswarm_client.dir/src/client.cpp.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/cmake_install.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/devel/lib/libmavswarm_client.so" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/devel/lib/libmavswarm_client.so" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/devel/lib/mavswarm_client/client_node" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/devel/lib/mavswarm_client/client_node" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock.dir/flags.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock_main.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock_main.dir/flags.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock_main.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/CMakeFiles/gmock_main.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/cmake_install.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest.dir/flags.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest_main.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest_main.dir/flags.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest_main.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/CMakeFiles/gtest_main.dir/link.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/gtest/gtest/cmake_install.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/mavswarm_client/client.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/mavswarm_client/client.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Crazyradio.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Crazyradio.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/client.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client_node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/client_node.cpp" afterDir="false" />
     </list>
@@ -308,6 +286,12 @@
       <workItem from="1579223109121" duration="2429000" />
       <workItem from="1579226055761" duration="6924000" />
       <workItem from="1579239388634" duration="2884000" />
+      <workItem from="1579247314300" duration="233000" />
+      <workItem from="1579248881201" duration="345000" />
+      <workItem from="1579250399613" duration="1319000" />
+      <workItem from="1579495991118" duration="2483000" />
+      <workItem from="1579498836421" duration="124000" />
+      <workItem from="1579584583415" duration="1324000" />
     </task>
     <servers />
   </component>
@@ -319,42 +303,42 @@
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
     <state x="755" y="236" key="#xdebugger.evaluate/65.24.1855.1056@65.24.1855.1056" timestamp="1579176281803" />
-    <state width="1803" height="362" key="GridCell.Tab.0.bottom" timestamp="1579242278452">
+    <state width="1803" height="362" key="GridCell.Tab.0.bottom" timestamp="1579585806293">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278452" />
-    <state width="1803" height="362" key="GridCell.Tab.0.center" timestamp="1579242278450">
+    <state width="1803" height="362" key="GridCell.Tab.0.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806293" />
+    <state width="1803" height="362" key="GridCell.Tab.0.center" timestamp="1579585806291">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278450" />
-    <state width="1803" height="362" key="GridCell.Tab.0.left" timestamp="1579242278448">
+    <state width="1803" height="362" key="GridCell.Tab.0.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806291" />
+    <state width="1803" height="362" key="GridCell.Tab.0.left" timestamp="1579585806290">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278448" />
-    <state width="1803" height="362" key="GridCell.Tab.0.right" timestamp="1579242278451">
+    <state width="1803" height="362" key="GridCell.Tab.0.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806290" />
+    <state width="1803" height="362" key="GridCell.Tab.0.right" timestamp="1579585806292">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278451" />
-    <state width="1803" height="362" key="GridCell.Tab.1.bottom" timestamp="1579242278459">
+    <state width="1803" height="362" key="GridCell.Tab.0.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806292" />
+    <state width="1803" height="362" key="GridCell.Tab.1.bottom" timestamp="1579585806299">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278459" />
-    <state width="1803" height="362" key="GridCell.Tab.1.center" timestamp="1579242278457">
+    <state width="1803" height="362" key="GridCell.Tab.1.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806299" />
+    <state width="1803" height="362" key="GridCell.Tab.1.center" timestamp="1579585806295">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278457" />
-    <state width="1803" height="362" key="GridCell.Tab.1.left" timestamp="1579242278454">
+    <state width="1803" height="362" key="GridCell.Tab.1.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806295" />
+    <state width="1803" height="362" key="GridCell.Tab.1.left" timestamp="1579585806294">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278454" />
-    <state width="1803" height="362" key="GridCell.Tab.1.right" timestamp="1579242278458">
+    <state width="1803" height="362" key="GridCell.Tab.1.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806294" />
+    <state width="1803" height="362" key="GridCell.Tab.1.right" timestamp="1579585806296">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579242278458" />
-    <state x="601" y="366" key="com.intellij.ide.util.TipDialog" timestamp="1579239397554">
+    <state width="1803" height="362" key="GridCell.Tab.1.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806296" />
+    <state x="601" y="366" key="com.intellij.ide.util.TipDialog" timestamp="1579584616598">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state x="601" y="366" key="com.intellij.ide.util.TipDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1579239397554" />
+    <state x="601" y="366" key="com.intellij.ide.util.TipDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1579584616598" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>

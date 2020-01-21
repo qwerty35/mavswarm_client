@@ -10,15 +10,11 @@
 
 #include <ros/console.h>
 #include <sstream>
-#include <fstream>
-#include <cstring>
 #include <stdexcept>
 #include <thread>
 #include <cmath>
 #include <inttypes.h>
-#include <client.h>
-#include <crtp.h>
-
+#include <iostream>
 
 const static int MAX_RADIOS = 1;
 const static bool LOG_COMMUNICATION = 0;
@@ -44,7 +40,7 @@ Client::Client(
         , m_frame_id("/world")
 {
     m_rosNodeHandle.param<std::string>("frame_id", m_frame_id, "/world");
-    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("/mavswarm_client/mav" + std::to_string(m_mavId) + "/pose", 5);
+    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("/mavswarm_client/mav" + std::to_string(m_mavId) + "/pose", 10);
 
     int datarate;
     int channel;
@@ -82,26 +78,38 @@ Client::Client(
             m_radio->setChannel(m_channel);
             m_radio->setAddress(m_address);
             m_radio->setMode(m_radio->Mode_PRX);
+            m_radio->setDatarate(m_datarate);
         }
     }
 
-
-
+    m_broadcast_fail_count = 0;
+    m_isBroadcast = false;
 }
 
 void Client::run() {
     uint32_t length;
     uint8_t data[32];
 
+    ROS_INFO("Start mavswarm_client");
     while(ros::ok()){
         // if there is no packet for both address, retry
         // else handle data
         m_radio->setAddress(0xFFE7E7E7E7); // broadcast address for external pose
         if(!m_radio->receivePacket(data, length)) {
-            m_radio->setAddress(m_address); // mav address for ping check
-            if (!m_radio->receivePacket(data, length)) {
-                continue;
+            if(!m_isBroadcast) {
+                m_radio->setAddress(m_address); // mav address for ping check
+                if (!m_radio->receivePacket(data, length)) {
+                    ROS_INFO("ping failed");
+                    continue;
+                }
             }
+            else{
+                m_broadcast_fail_count++;
+            }
+        }
+        else if(!m_isBroadcast){
+            ROS_INFO("Change to broadcast address");
+            m_isBroadcast = true;
         }
         handleData(data);
 //        ros::spinOnce();

@@ -6,10 +6,10 @@ int main(int argc, char **argv){
     ros::NodeHandle nh;
 
     std::string uri;
-    int dev_id;
+    int mav_id;
     nh.param<std::string>("uri", uri, "radio://0/50/2M/E7E7E7E701");
-    nh.param<int>("dev_id", dev_id, 1);
+    nh.param<int>("mav_id", mav_id, 1);
 
-    Client client(nh, uri, dev_id);
+    Client client(nh, uri, mav_id);
     client.run();
 }

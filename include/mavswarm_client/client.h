@@ -36,6 +36,8 @@ private:
     uint8_t m_channel;
     uint64_t m_address;
     Crazyradio::Datarate m_datarate;
+    bool m_isBroadcast;
+    int m_broadcast_fail_count;
 
     void handleData(const uint8_t* data);
     void publishExternalPose(const uint8_t* data);
