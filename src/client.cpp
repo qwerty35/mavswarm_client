@@ -26,20 +26,18 @@ const static bool LOG_COMMUNICATION = 0;
 //std::mutex g_crazyflieusbMutex[MAX_USB];
 
 Client::Client(
-        ros::NodeHandle nh,
         const std::string& link_uri,
-        int mav_id)
-        : m_rosNodeHandle(nh)
-        , m_radio(nullptr)
+        int mav_id,
+        const std::string& frame_id)
+        : m_radio(nullptr)
         , m_transport(nullptr)
         , m_mavId(mav_id)
         , m_devId(0)
         , m_channel(0)
         , m_address(0)
         , m_datarate(Crazyradio::Datarate_250KPS)
-        , m_frame_id("/world")
+        , m_frame_id(frame_id)
 {
-    m_rosNodeHandle.param<std::string>("frame_id", m_frame_id, "/world");
     m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavswarm_client/pose", 10);
 
     int datarate;

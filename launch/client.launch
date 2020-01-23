@@ -10,5 +10,18 @@
             <param name="mav_id" value="$(arg mav_id)"/>
             <param name="frame_id" value="$(arg frame_id)"/>
         </node>
+        
+        <include file="$(find mavros)/launch/px4.launch">
+	
+	</include>
+
+        <!--mav wrapper-->
+        <node name="mav_wrapper_node" pkg="px4_code" type="mav_wrapper_node" output="screen">   
+            <param name="mav_frame_id" value="/mav1/mavswarm_client/pose"/>
+            <param name="world_frame_id" value="/world"/>
+            <param name="external_pose_topic" value="/mav1/mavswarm_client/pose"/>
+
+            <param name="pose_on" value="true"/>
+        </node>
     </group>
 </launch>

@@ -18,7 +18,7 @@
 
 class Client {
 public:
-    Client(ros::NodeHandle nh, const std::string& link_uri, int dev_id);
+    Client(const std::string& link_uri, int mav_id, const std::string& frame_id);
 
     void run();
 private:
