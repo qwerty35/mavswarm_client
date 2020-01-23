@@ -2,33 +2,33 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="mavswarm_client" targetName="gtest" />
-      <config projectName="mavswarm_client" targetName="doxygen" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_eus" />
-      <config projectName="mavswarm_client" targetName="clean_test_results" />
-      <config projectName="mavswarm_client" targetName="client_node" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_py" />
-      <config projectName="mavswarm_client" targetName="gmock_main" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_nodejs" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_cpp" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_cpp" />
-      <config projectName="mavswarm_client" targetName="download_extra_data" />
-      <config projectName="mavswarm_client" targetName="run_tests" />
       <config projectName="mavswarm_client" targetName="tests" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_nodejs" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_cpp" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_cpp" />
+      <config projectName="mavswarm_client" targetName="clean_test_results" />
       <config projectName="mavswarm_client" targetName="gtest_main" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_lisp" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_cpp" />
       <config projectName="mavswarm_client" targetName="mavswarm_client" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_lisp" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_nodejs" />
+      <config projectName="mavswarm_client" targetName="fake_pose_node" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_lisp" />
+      <config projectName="mavswarm_client" targetName="gtest" />
       <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_py" />
       <config projectName="mavswarm_client" targetName="roscpp_generate_messages_py" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_nodejs" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_eus" />
-      <config projectName="mavswarm_client" targetName="fake_pose_node" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_eus" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_lisp" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_eus" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_py" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_lisp" />
       <config projectName="mavswarm_client" targetName="gmock" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_cpp" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_eus" />
+      <config projectName="mavswarm_client" targetName="doxygen" />
+      <config projectName="mavswarm_client" targetName="download_extra_data" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_nodejs" />
+      <config projectName="mavswarm_client" targetName="client_node" />
+      <config projectName="mavswarm_client" targetName="run_tests" />
+      <config projectName="mavswarm_client" targetName="gmock_main" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_eus" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_lisp" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_nodejs" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -39,11 +39,8 @@
   <component name="ChangeListManager">
     <list default="true" id="86116c36-1d19-4fd1-a0cd-bd5bea54a61b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/mavswarm_client/client.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/mavswarm_client/client.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Crazyradio.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Crazyradio.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/launch/client.launch" beforeDir="false" afterPath="$PROJECT_DIR$/launch/client.launch" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/client.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client_node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/client_node.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,6 +289,7 @@
       <workItem from="1579495991118" duration="2483000" />
       <workItem from="1579498836421" duration="124000" />
       <workItem from="1579584583415" duration="1324000" />
+      <workItem from="1579756618590" duration="750000" />
     </task>
     <servers />
   </component>
@@ -303,42 +301,42 @@
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
     <state x="755" y="236" key="#xdebugger.evaluate/65.24.1855.1056@65.24.1855.1056" timestamp="1579176281803" />
-    <state width="1803" height="362" key="GridCell.Tab.0.bottom" timestamp="1579585806293">
+    <state width="1803" height="362" key="GridCell.Tab.0.bottom" timestamp="1579756819688">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806293" />
-    <state width="1803" height="362" key="GridCell.Tab.0.center" timestamp="1579585806291">
+    <state width="1803" height="362" key="GridCell.Tab.0.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579756819688" />
+    <state width="1803" height="362" key="GridCell.Tab.0.center" timestamp="1579756819685">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806291" />
-    <state width="1803" height="362" key="GridCell.Tab.0.left" timestamp="1579585806290">
+    <state width="1803" height="362" key="GridCell.Tab.0.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579756819685" />
+    <state width="1803" height="362" key="GridCell.Tab.0.left" timestamp="1579756819685">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806290" />
-    <state width="1803" height="362" key="GridCell.Tab.0.right" timestamp="1579585806292">
+    <state width="1803" height="362" key="GridCell.Tab.0.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579756819685" />
+    <state width="1803" height="362" key="GridCell.Tab.0.right" timestamp="1579756819686">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.0.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806292" />
-    <state width="1803" height="362" key="GridCell.Tab.1.bottom" timestamp="1579585806299">
+    <state width="1803" height="362" key="GridCell.Tab.0.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579756819686" />
+    <state width="1803" height="362" key="GridCell.Tab.1.bottom" timestamp="1579756821762">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806299" />
-    <state width="1803" height="362" key="GridCell.Tab.1.center" timestamp="1579585806295">
+    <state width="1803" height="362" key="GridCell.Tab.1.bottom/65.24.1855.1056@65.24.1855.1056" timestamp="1579756821762" />
+    <state width="1803" height="362" key="GridCell.Tab.1.center" timestamp="1579756821756">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806295" />
-    <state width="1803" height="362" key="GridCell.Tab.1.left" timestamp="1579585806294">
+    <state width="1803" height="362" key="GridCell.Tab.1.center/65.24.1855.1056@65.24.1855.1056" timestamp="1579756821756" />
+    <state width="1803" height="362" key="GridCell.Tab.1.left" timestamp="1579756821755">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806294" />
-    <state width="1803" height="362" key="GridCell.Tab.1.right" timestamp="1579585806296">
+    <state width="1803" height="362" key="GridCell.Tab.1.left/65.24.1855.1056@65.24.1855.1056" timestamp="1579756821755" />
+    <state width="1803" height="362" key="GridCell.Tab.1.right" timestamp="1579756821761">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state width="1803" height="362" key="GridCell.Tab.1.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579585806296" />
-    <state x="601" y="366" key="com.intellij.ide.util.TipDialog" timestamp="1579584616598">
+    <state width="1803" height="362" key="GridCell.Tab.1.right/65.24.1855.1056@65.24.1855.1056" timestamp="1579756821761" />
+    <state x="601" y="366" key="com.intellij.ide.util.TipDialog" timestamp="1579756618633">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state x="601" y="366" key="com.intellij.ide.util.TipDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1579584616598" />
+    <state x="601" y="366" key="com.intellij.ide.util.TipDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1579756618633" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>

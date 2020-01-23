@@ -40,7 +40,7 @@ Client::Client(
         , m_frame_id("/world")
 {
     m_rosNodeHandle.param<std::string>("frame_id", m_frame_id, "/world");
-    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("/mavswarm_client/mav" + std::to_string(m_mavId) + "/pose", 10);
+    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavswarm_client/pose", 10);
 
     int datarate;
     int channel;

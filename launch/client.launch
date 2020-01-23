@@ -4,9 +4,11 @@
     <arg name="mav_id" default = "1"/>
     <arg name="frame_id" default = "/world"/>
 
-    <node name="client_node" pkg="mavswarm_client" type="client_node" output="screen">
-        <param name="uri" value="$(arg uri)"/>
-        <param name="mav_id" value="$(arg mav_id)"/>
-        <param name="frame_id" value="$(arg frame_id)"/>
-    </node>
+    <group ns="mav1">
+        <node name="client_node" pkg="mavswarm_client" type="client_node" output="screen">
+            <param name="uri" value="$(arg uri)"/>
+            <param name="mav_id" value="$(arg mav_id)"/>
+            <param name="frame_id" value="$(arg frame_id)"/>
+        </node>
+    </group>
 </launch>
