@@ -75,6 +75,7 @@ Client::Client(
             m_radio->setArc(0);
             m_radio->setChannel(m_channel);
             m_radio->setAddress(m_address);
+            m_radio->setAddr2(0xFFE7E7E7E7);
             m_radio->setMode(m_radio->Mode_PRX);
             m_radio->setDatarate(m_datarate);
         }
@@ -90,27 +91,13 @@ void Client::run() {
 
     ROS_INFO("Start mavswarm_client");
     while(ros::ok()){
-        // if there is no packet for both address, retry
-        // else handle data
-        m_radio->setAddress(0xFFE7E7E7E7); // broadcast address for external pose
-        if(!m_radio->receivePacket(data, length)) {
-            if(!m_isBroadcast) {
-                m_radio->setAddress(m_address); // mav address for ping check
-                if (!m_radio->receivePacket(data, length)) {
-                    ROS_INFO("ping failed");
-                    continue;
-                }
-            }
-            else{
-                m_broadcast_fail_count++;
-            }
+        if (!m_radio->receivePacket(data, length)) {
+            ROS_INFO("ping failed");
+            continue;
         }
-        else if(!m_isBroadcast){
-            ROS_INFO("Change to broadcast address");
-            m_isBroadcast = true;
-        }
+
         handleData(data);
-//        ros::spinOnce();
+////        ros::spinOnce();
     }
 }
 

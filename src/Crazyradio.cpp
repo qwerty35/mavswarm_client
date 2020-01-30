@@ -13,6 +13,7 @@ enum
     SET_RADIO_POWER     = 0x04,
     SET_RADIO_ARD       = 0x05,
     SET_RADIO_ARC       = 0x06,
+    SET_RADIO_ADDR2     = 0x07,
     ACK_ENABLE          = 0x10,
     SET_CONT_CARRIER    = 0x20,
     SCANN_CHANNELS      = 0x21,
@@ -76,6 +77,33 @@ void Crazyradio::setAddress(uint64_t address)
         a,
         5,
         /*timeout*/ 1000);
+    // if (status != LIBUSB_SUCCESS) {
+    //     std::cerr << "sendVendorSetup: " << libusb_error_name(status) << std::endl;
+    // }
+    m_address = address;
+}
+
+void Crazyradio::setAddr2(uint64_t address)
+{
+    unsigned char a[5];
+    a[4] = (address >> 0) & 0xFF;
+    a[3] = (address >> 8) & 0xFF;
+    a[2] = (address >> 16) & 0xFF;
+    a[1] = (address >> 24) & 0xFF;
+    a[0] = (address >> 32) & 0xFF;
+
+    // sendVendorSetup(SET_RADIO_ADDRESS, 0, 0, a, 5);
+    // unsigned char a[] = {0xe7, 0xe7, 0xe7, 0xe7, 0x02};
+
+    /*int status =*/ libusb_control_transfer(
+            m_handle,
+            LIBUSB_REQUEST_TYPE_VENDOR,
+            SET_RADIO_ADDR2,
+            0,
+            0,
+            a,
+            5,
+            /*timeout*/ 1000);
     // if (status != LIBUSB_SUCCESS) {
     //     std::cerr << "sendVendorSetup: " << libusb_error_name(status) << std::endl;
     // }
@@ -289,7 +317,7 @@ bool Crazyradio::receivePacket(
     // Read result
     status = libusb_bulk_transfer(
             m_handle,
-            /* endpoint*/ (0x81 | LIBUSB_ENDPOINT_IN),
+            /* endpoint*/ (0x81 | LIBUSB_ENDPOINT_IN), //test
             (uint8_t *) data,
             31,
             &transferred,

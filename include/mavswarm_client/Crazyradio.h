@@ -54,6 +54,9 @@ public:
     void setAddress(
         uint64_t address);
 
+    void setAddr2(
+        uint64_t address);
+
     uint64_t getAddress() const {
         return m_address;
     }
