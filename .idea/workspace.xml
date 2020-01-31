@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
-      <config projectName="mavswarm_client" targetName="tests" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_nodejs" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_cpp" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_cpp" />
-      <config projectName="mavswarm_client" targetName="clean_test_results" />
-      <config projectName="mavswarm_client" targetName="gtest_main" />
-      <config projectName="mavswarm_client" targetName="mavswarm_client" />
-      <config projectName="mavswarm_client" targetName="client_node" />
       <config projectName="mavswarm_client" targetName="gtest" />
-      <config projectName="mavswarm_client" targetName="gmock" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_eus" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_nodejs" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_lisp" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_py" />
-      <config projectName="mavswarm_client" targetName="run_tests" />
-      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_eus" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_cpp" />
-      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_lisp" />
       <config projectName="mavswarm_client" targetName="doxygen" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_eus" />
+      <config projectName="mavswarm_client" targetName="clean_test_results" />
+      <config projectName="mavswarm_client" targetName="client_node" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_py" />
+      <config projectName="mavswarm_client" targetName="gmock_main" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_nodejs" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_cpp" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_cpp" />
+      <config projectName="mavswarm_client" targetName="download_extra_data" />
+      <config projectName="mavswarm_client" targetName="run_tests" />
+      <config projectName="mavswarm_client" targetName="tests" />
+      <config projectName="mavswarm_client" targetName="gtest_main" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_lisp" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_cpp" />
+      <config projectName="mavswarm_client" targetName="mavswarm_client" />
       <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_lisp" />
       <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_nodejs" />
-      <config projectName="mavswarm_client" targetName="download_extra_data" />
-      <config projectName="mavswarm_client" targetName="fake_pose_node" />
-      <config projectName="mavswarm_client" targetName="gmock_main" />
-      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_eus" />
       <config projectName="mavswarm_client" targetName="roscpp_generate_messages_py" />
       <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_py" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_nodejs" />
+      <config projectName="mavswarm_client" targetName="rosgraph_msgs_generate_messages_eus" />
+      <config projectName="mavswarm_client" targetName="fake_pose_node" />
+      <config projectName="mavswarm_client" targetName="std_msgs_generate_messages_eus" />
+      <config projectName="mavswarm_client" targetName="roscpp_generate_messages_lisp" />
+      <config projectName="mavswarm_client" targetName="gmock" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -39,11 +39,10 @@
   <component name="ChangeListManager">
     <list default="true" id="86116c36-1d19-4fd1-a0cd-bd5bea54a61b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/mavswarm_client/Crazyradio.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/mavswarm_client/Crazyradio.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Crazyradio.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Crazyradio.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/mavswarm_client/client.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/mavswarm_client/client.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/client.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client_node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/client_node.cpp" afterDir="false" />
     </list>
+    <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -53,12 +52,133 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FUSProjectUsageTrigger">
+    <session id="-1657007513">
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="cpp" value="1104" />
+          <entry key="h" value="93" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="ObjectiveC" value="1197" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="h" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="ObjectiveC" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="1" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/client.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1785">
+              <caret line="93" column="9" lean-forward="true" selection-start-line="93" selection-start-column="9" selection-end-line="93" selection-end-column="9" />
+              <folding>
+                <element signature="e#0#16#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/mavswarm_client/client.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="40" column="31" lean-forward="true" selection-start-line="40" selection-start-column="31" selection-end-line="40" selection-end-column="46" />
+              <folding>
+                <element signature="e#13#33#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/include/mavswarm_client/client.h" />
+        <option value="$PROJECT_DIR$/src/client.cpp" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
   <component name="OCFindUsagesOptions" text="false" ivars="false" properties="true" derivedClasses="false" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="65" />
+    <option name="y" value="-4" />
+    <option name="width" value="1855" />
+    <option name="height" value="1084" />
+  </component>
   <component name="ProjectId" id="1WSb0PGiusGVmDyY3snX7N2xQ72" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="mavswarm_client" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mavswarm_client" type="47feb1d3:ProjectViewModuleNode" />
+            </path>
+            <path>
+              <item name="mavswarm_client" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mavswarm_client" type="47feb1d3:ProjectViewModuleNode" />
+              <item name="mavswarm_client" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mavswarm_client" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mavswarm_client" type="47feb1d3:ProjectViewModuleNode" />
+              <item name="mavswarm_client" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mavswarm_client" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mavswarm_client" type="47feb1d3:ProjectViewModuleNode" />
+              <item name="mavswarm_client" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="mavswarm_client" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mavswarm_client" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mavswarm_client" type="47feb1d3:ProjectViewModuleNode" />
+              <item name="mavswarm_client" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -79,7 +199,19 @@
       <recent name="$PROJECT_DIR$/include/mavswarm_client" />
     </key>
   </component>
-  <component name="RunManager" selected="CMake Application.client_node">
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.Build All">
     <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" EXPLICIT_BUILD_TARGET_NAME="all">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -221,34 +353,34 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="CMake Application.Build All" />
-      <item itemvalue="CMake Application.clean_test_results" />
-      <item itemvalue="CMake Application.client_node" />
-      <item itemvalue="CMake Application.download_extra_data" />
-      <item itemvalue="CMake Application.doxygen" />
-      <item itemvalue="CMake Application.fake_pose_node" />
-      <item itemvalue="CMake Application.gmock" />
-      <item itemvalue="CMake Application.gmock_main" />
-      <item itemvalue="CMake Application.gtest" />
-      <item itemvalue="CMake Application.gtest_main" />
-      <item itemvalue="CMake Application.mavswarm_client" />
-      <item itemvalue="CMake Application.roscpp_generate_messages_cpp" />
-      <item itemvalue="CMake Application.roscpp_generate_messages_eus" />
-      <item itemvalue="CMake Application.roscpp_generate_messages_lisp" />
-      <item itemvalue="CMake Application.roscpp_generate_messages_nodejs" />
-      <item itemvalue="CMake Application.roscpp_generate_messages_py" />
-      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_cpp" />
-      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_eus" />
-      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_lisp" />
-      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_nodejs" />
-      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_py" />
-      <item itemvalue="CMake Application.run_tests" />
-      <item itemvalue="CMake Application.std_msgs_generate_messages_cpp" />
-      <item itemvalue="CMake Application.std_msgs_generate_messages_eus" />
-      <item itemvalue="CMake Application.std_msgs_generate_messages_lisp" />
-      <item itemvalue="CMake Application.std_msgs_generate_messages_nodejs" />
-      <item itemvalue="CMake Application.std_msgs_generate_messages_py" />
-      <item itemvalue="CMake Application.tests" />
+      <item itemvalue="Application.Build All" />
+      <item itemvalue="Application.clean_test_results" />
+      <item itemvalue="Application.client_node" />
+      <item itemvalue="Application.download_extra_data" />
+      <item itemvalue="Application.doxygen" />
+      <item itemvalue="Application.fake_pose_node" />
+      <item itemvalue="Application.gmock" />
+      <item itemvalue="Application.gmock_main" />
+      <item itemvalue="Application.gtest" />
+      <item itemvalue="Application.gtest_main" />
+      <item itemvalue="Application.mavswarm_client" />
+      <item itemvalue="Application.roscpp_generate_messages_cpp" />
+      <item itemvalue="Application.roscpp_generate_messages_eus" />
+      <item itemvalue="Application.roscpp_generate_messages_lisp" />
+      <item itemvalue="Application.roscpp_generate_messages_nodejs" />
+      <item itemvalue="Application.roscpp_generate_messages_py" />
+      <item itemvalue="Application.rosgraph_msgs_generate_messages_cpp" />
+      <item itemvalue="Application.rosgraph_msgs_generate_messages_eus" />
+      <item itemvalue="Application.rosgraph_msgs_generate_messages_lisp" />
+      <item itemvalue="Application.rosgraph_msgs_generate_messages_nodejs" />
+      <item itemvalue="Application.rosgraph_msgs_generate_messages_py" />
+      <item itemvalue="Application.run_tests" />
+      <item itemvalue="Application.std_msgs_generate_messages_cpp" />
+      <item itemvalue="Application.std_msgs_generate_messages_eus" />
+      <item itemvalue="Application.std_msgs_generate_messages_lisp" />
+      <item itemvalue="Application.std_msgs_generate_messages_nodejs" />
+      <item itemvalue="Application.std_msgs_generate_messages_py" />
+      <item itemvalue="Application.tests" />
     </list>
   </component>
   <component name="ServiceViewManager">
@@ -297,6 +429,33 @@
       <workItem from="1580349187000" duration="6703000" />
     </task>
     <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="6731000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26563364" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="10" />
+      <window_info anchor="bottom" id="CMake" order="11" visible="true" weight="0.32984293" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Database" order="3" />
+    </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -371,5 +530,86 @@
         <watch expression="m_handle" language="ObjectiveC" />
       </configuration>
     </watches-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/crtp.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="660">
+          <caret line="44" column="13" selection-start-line="44" selection-start-column="13" selection-end-line="44" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/mavswarm_client/crtp.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="18" column="12" selection-start-line="18" selection-start-column="12" selection-end-line="18" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/crtpNRF51.h">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="37" selection-start-column="37" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/client_node.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#38#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CrazyflieUSB.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/mavswarm_client/Crazyradio.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="900">
+          <caret line="63" column="17" selection-start-line="63" selection-start-column="17" selection-end-line="63" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Crazyradio.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="20" column="18" selection-start-line="20" selection-start-column="18" selection-end-line="20" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/mavswarm_client/client.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="40" column="31" lean-forward="true" selection-start-line="40" selection-start-column="31" selection-end-line="40" selection-end-column="46" />
+          <folding>
+            <element signature="e#13#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/client.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1785">
+          <caret line="93" column="9" lean-forward="true" selection-start-line="93" selection-start-column="9" selection-end-line="93" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
   </component>
 </project>
