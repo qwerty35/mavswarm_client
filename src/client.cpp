@@ -21,7 +21,8 @@ const static int MAX_RADIOS = 1;
 Client::Client(
         const std::string& link_uri,
         int mav_id,
-        const std::string& frame_id)
+        const std::string& frame_id,
+        int kill_switch_channel)
         : m_radio(nullptr)
         , m_transport(nullptr)
         , m_mavId(mav_id)
@@ -30,9 +31,11 @@ Client::Client(
         , m_address(0)
         , m_datarate(Crazyradio::Datarate_250KPS)
         , m_frame_id(frame_id)
+        , m_kill_switch_channel(kill_switch_channel)
 {
     m_pub_setpoint = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
     m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/vision_pose/pose", 10);
+    m_pub_emergencyStop = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/rc/override", 10);
     m_sub_current_state = m_rosNodeHandle.subscribe<mavros_msgs::State>("mavros/state", 10, &Client::mavros_state_callback, this);
     m_arming_client = m_rosNodeHandle.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
     m_set_mode_client = m_rosNodeHandle.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
@@ -79,12 +82,15 @@ Client::Client(
     }
 
     m_is_extPose_received = false;
+    m_is_emergency = false;
+
+    m_msgs_emergencyStop.channels[m_kill_switch_channel] = 2070;
 }
 
 void Client::run() {
     uint32_t length;
     uint8_t data[32];
-    ros::Rate rate_max = 50;
+    ros::Rate rate_max = 80;
 
     int count_max = 500;
     int trial_count = 0;
@@ -162,7 +168,7 @@ void Client::handleData(const uint8_t* data){
     }
     // High level setpoint - stop
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 3){
-
+        emergencyStop();
     }
     // High level setpoint - goto
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 4){
@@ -237,11 +243,10 @@ void Client::takeoff(const uint8_t* data) {
             return;
         }
     }
-
-
 }
 
-void Client::log_radiolink(){
+void Client::emergencyStop() {
+    m_is_emergency = true;
 
 }
 
@@ -259,6 +264,11 @@ void Client::publishMsgs(ros::Rate rate_max) {
     // publish setpoint
     m_msgs_setpoint.header.stamp = ros::Time::now();
     m_pub_setpoint.publish(m_msgs_setpoint);
+
+    // publish emergency stop
+    if(m_is_emergency){
+        m_pub_emergencyStop.publish(m_msgs_emergencyStop);
+    }
 
     m_last_pub_time = ros::Time::now();
 }
