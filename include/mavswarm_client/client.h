@@ -27,6 +27,7 @@ public:
     void run();
 private:
     int m_mavId;
+    std::string m_frame_id;
 
     ros::NodeHandle m_rosNodeHandle;
     ros::Publisher m_pub_externalPose;
@@ -36,10 +37,12 @@ private:
     ros::ServiceClient m_set_mode_client;
 
     mavros_msgs::State m_current_state;
-    std::string m_frame_id;
+    geometry_msgs::PoseStamped m_msgs_setpoint;
+    geometry_msgs::PoseStamped m_msgs_extPose;
 
-    geometry_msgs::PoseStamped m_setpoint_msgs;
-    geometry_msgs::PoseStamped m_extPose_msgs;
+    ros::Time m_last_pub_time;
+
+
 
     // crazyradio
     Crazyradio* m_radio;
@@ -49,12 +52,15 @@ private:
     uint64_t m_address;
     Crazyradio::Datarate m_datarate;
     bool m_is_extPose_received;
-    int m_broadcast_fail_count;
+    double m_link_quality;
+    double m_link_rate;
 
     void handleData(const uint8_t* data);
-    void publishExternalPose(const uint8_t* data);
+    void receiveExternalPose(const uint8_t* data);
     void takeoff(const uint8_t* data);
     void mavros_state_callback(const mavros_msgs::State::ConstPtr& msg);
+    void publishMsgs(ros::Rate rate_max);
+    void log_radiolink();
     void quatextract(uint32_t quat, float* q);
 };
 

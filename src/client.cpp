@@ -79,27 +79,43 @@ Client::Client(
     }
 
     m_is_extPose_received = false;
-    m_broadcast_fail_count = 0;
 }
 
 void Client::run() {
     uint32_t length;
     uint8_t data[32];
+    ros::Rate rate_max = 80;
+
+    int count_max = 100;
+    int trial_count = 0;
+    int fail_count = 0;
+    ros::Time start_time = ros::Time::now();
 
     ROS_INFO("[MAVSWARM_CLIENT] Start mavswarm_client");
     while(ros::ok()){
         if (!m_radio->receivePacket(data, length)) {
             ROS_WARN("[MAVSWARM_CLIENT] ping failed");
             m_is_extPose_received = false;
-            m_broadcast_fail_count++;
+            fail_count++;
         }
         else{
-            m_is_extPose_received = true;
+            if(!m_is_extPose_received) {
+                m_is_extPose_received = true;
+            }
             handleData(data);
         }
+        trial_count++;
 
-	m_setpoint_msgs.header.stamp = ros::Time::now();
-        m_pub_setpoint.publish(m_setpoint_msgs);
+        // link quality and rate
+        if(trial_count == count_max){
+            m_link_quality = 1 - ((double)fail_count/(double)trial_count);
+            m_link_rate = (double)count_max / (ros::Time::now() - start_time).toSec();
+
+            trial_count = 0;
+            fail_count = 0;
+        }
+
+        publishMsgs(rate_max);
         ros::spinOnce();
     }
 }
@@ -107,7 +123,7 @@ void Client::run() {
 void Client::handleData(const uint8_t* data){
     // external pose
     if(crtp(data[0]) == crtp(6, 1)){
-        publishExternalPose(data);
+        receiveExternalPose(data);
         return;
     }
 
@@ -159,25 +175,23 @@ void Client::handleData(const uint8_t* data){
     m_radio->sendPacketNoAck((uint8_t*)&ack, ack_size);
 }
 
-void Client::publishExternalPose(const uint8_t* data) {
+void Client::receiveExternalPose(const uint8_t* data) {
     auto extPose_crtp = (crtpExternalPosePacked*)data;
     for(int i = 0; i < 2; i++) {
         if (m_mavId == extPose_crtp->poses[i].id) {
-            m_extPose_msgs.header.frame_id = m_frame_id;
-            m_extPose_msgs.header.stamp = ros::Time::now();
+            m_msgs_extPose.header.frame_id = m_frame_id;
+            m_msgs_extPose.header.stamp = ros::Time::now();
 
-            m_extPose_msgs.pose.position.x = (float)extPose_crtp->poses[i].x/1000;
-            m_extPose_msgs.pose.position.y = (float)extPose_crtp->poses[i].y/1000;
-            m_extPose_msgs.pose.position.z = (float)extPose_crtp->poses[i].z/1000;
+            m_msgs_extPose.pose.position.x = (float)extPose_crtp->poses[i].x/1000;
+            m_msgs_extPose.pose.position.y = (float)extPose_crtp->poses[i].y/1000;
+            m_msgs_extPose.pose.position.z = (float)extPose_crtp->poses[i].z/1000;
 
             float q[4];
             quatextract(extPose_crtp->poses[i].quat, q);
-            m_extPose_msgs.pose.orientation.x = q[0];
-            m_extPose_msgs.pose.orientation.y = q[1];
-            m_extPose_msgs.pose.orientation.z = q[2];
-            m_extPose_msgs.pose.orientation.w = q[3];
-
-            m_pub_externalPose.publish(m_extPose_msgs);
+            m_msgs_extPose.pose.orientation.x = q[0];
+            m_msgs_extPose.pose.orientation.y = q[1];
+            m_msgs_extPose.pose.orientation.z = q[2];
+            m_msgs_extPose.pose.orientation.w = q[3];
         }
     }
 }
@@ -190,11 +204,11 @@ void Client::takeoff(const uint8_t* data) {
         return;
     }
     // initialize setpoint
-    m_setpoint_msgs = m_extPose_msgs;
-    m_setpoint_msgs.pose.position.z = cmd_takeoff_crtp->height;
-    ROS_INFO_STREAM("Initilize setpoint, x: " << m_setpoint_msgs.pose.position.x
-                                   << ", y: " << m_setpoint_msgs.pose.position.y
-                                   << ", z: " << m_setpoint_msgs.pose.position.z);
+    m_msgs_setpoint = m_msgs_extPose;
+    m_msgs_setpoint.pose.position.z = cmd_takeoff_crtp->height;
+    ROS_INFO_STREAM("Initilize setpoint, x: " << m_msgs_setpoint.pose.position.x
+                                   << ", y: " << m_msgs_setpoint.pose.position.y
+                                   << ", z: " << m_msgs_setpoint.pose.position.z);
 
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
@@ -223,8 +237,26 @@ void Client::takeoff(const uint8_t* data) {
 
 }
 
+void Client::log_radiolink(){
+
+}
+
 void Client::mavros_state_callback(const mavros_msgs::State::ConstPtr& msg){
     m_current_state = *msg;
+}
+
+void Client::publishMsgs(ros::Rate rate_max) {
+    if (ros::Time::now() - m_last_pub_time < rate_max.cycleTime())
+        return;
+
+    // publish external pose
+    m_pub_externalPose.publish(m_msgs_extPose);
+
+    // publish setpoint
+    m_msgs_setpoint.header.stamp = ros::Time::now();
+    m_pub_setpoint.publish(m_msgs_setpoint);
+
+    m_last_pub_time = ros::Time::now();
 }
 
 void Client::quatextract(uint32_t quat, float* q){
