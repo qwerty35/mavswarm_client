@@ -111,6 +111,8 @@ void Client::run() {
             m_link_quality = 1 - ((double)fail_count/(double)trial_count);
             m_link_rate = (double)count_max / (ros::Time::now() - start_time).toSec();
 
+            ROS_INFO_STREAM("[MAVSWARM_CLIENT] link_quality: " << m_link_quality << ", link_rate: " << m_link_rate << "Hz");
+
             trial_count = 0;
             fail_count = 0;
         }
