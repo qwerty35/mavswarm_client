@@ -31,7 +31,8 @@ Client::Client(
         , m_datarate(Crazyradio::Datarate_250KPS)
         , m_frame_id(frame_id)
 {
-    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavswarm_client/pose", 10);
+    m_pub_setpoint = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
+    m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/vision_pose/pose", 10);
     m_sub_current_state = m_rosNodeHandle.subscribe<mavros_msgs::State>("mavros/state", 10, &Client::mavros_state_callback, this);
     m_arming_client = m_rosNodeHandle.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
     m_set_mode_client = m_rosNodeHandle.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
@@ -97,6 +98,7 @@ void Client::run() {
             handleData(data);
         }
 
+	m_setpoint_msgs.header.stamp = ros::Time::now();
         m_pub_setpoint.publish(m_setpoint_msgs);
         ros::spinOnce();
     }

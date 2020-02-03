@@ -16,12 +16,12 @@
 	</include>
 
         <!--mav wrapper-->
-        <node name="mav_wrapper_node" pkg="px4_code" type="mav_wrapper_node" output="screen">   
+        <!--node name="mav_wrapper_node" pkg="px4_code" type="mav_wrapper_node" output="screen">   
             <param name="mav_frame_id" value="/mav1/mavswarm_client/pose"/>
             <param name="world_frame_id" value="/world"/>
             <param name="external_pose_topic" value="/mav1/mavswarm_client/pose"/>
 
             <param name="pose_on" value="true"/>
-        </node>
+        </node-->
     </group>
 </launch>
