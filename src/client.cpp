@@ -84,12 +84,13 @@ Client::Client(
 void Client::run() {
     uint32_t length;
     uint8_t data[32];
-    ros::Rate rate_max = 80;
+    ros::Rate rate_max = 50;
 
-    int count_max = 100;
+    int count_max = 500;
     int trial_count = 0;
     int fail_count = 0;
     ros::Time start_time = ros::Time::now();
+    m_last_pub_time = ros::Time::now();    
 
     ROS_INFO("[MAVSWARM_CLIENT] Start mavswarm_client");
     while(ros::ok()){
@@ -115,6 +116,7 @@ void Client::run() {
 
             trial_count = 0;
             fail_count = 0;
+            start_time = ros::Time::now();
         }
 
         publishMsgs(rate_max);
@@ -248,7 +250,7 @@ void Client::mavros_state_callback(const mavros_msgs::State::ConstPtr& msg){
 }
 
 void Client::publishMsgs(ros::Rate rate_max) {
-    if (ros::Time::now() - m_last_pub_time < rate_max.cycleTime())
+    if (ros::Time::now() - m_last_pub_time < rate_max.expectedCycleTime())
         return;
 
     // publish external pose
