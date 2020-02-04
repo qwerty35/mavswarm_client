@@ -230,28 +230,12 @@ void Client::takeoff(const uint8_t* data) {
                                    << ", y: " << m_msgs_setpoint.pose.position.y
                                    << ", z: " << m_msgs_setpoint.pose.position.z);
 
-    ros::Rate rate(20);
-    for(int i = 100; ros::ok() && i > 0; --i){
-        m_pub_setpoint.publish(m_msgs_setpoint);
-        ros::spinOnce();
-	rate.sleep();
-    }
 
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
 
     mavros_msgs::CommandBool arm_cmd;
     arm_cmd.request.value = true;
-
-    if( !m_current_state.armed ){
-        if( m_arming_client.call(arm_cmd) && arm_cmd.response.success){
-            ROS_INFO("[MAVSWARM_CLIENT] Vehicle armed");
-        }
-        else{
-            ROS_ERROR("[MAVSWARM_CLIENT] Arming failed");
-            return;
-        }
-    }
 
     if( m_current_state.mode != "OFFBOARD"){
         if( m_set_mode_client.call(offb_set_mode) && offb_set_mode.response.mode_sent){
@@ -264,15 +248,15 @@ void Client::takeoff(const uint8_t* data) {
     }
 
     
-//    if( !m_current_state.armed ){
-//        if( m_arming_client.call(arm_cmd) && arm_cmd.response.success){
-//            ROS_INFO("[MAVSWARM_CLIENT] Vehicle armed");
-//        }
-//        else{
-//            ROS_ERROR("[MAVSWARM_CLIENT] Arming failed");
-//            return;
-//        }
-//    }
+    if( !m_current_state.armed ){
+        if( m_arming_client.call(arm_cmd) && arm_cmd.response.success){
+            ROS_INFO("[MAVSWARM_CLIENT] Vehicle armed");
+        }
+        else{
+            ROS_ERROR("[MAVSWARM_CLIENT] Arming failed");
+            return;
+        }
+    }
 }
 
 void Client::emergencyStop() {
