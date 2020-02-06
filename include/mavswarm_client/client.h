@@ -37,6 +37,7 @@ private:
     ros::Subscriber m_sub_current_state;
     ros::ServiceClient m_arming_client;
     ros::ServiceClient m_set_mode_client;
+    ros::ServiceClient m_emergency_stop_client;
 
     mavros_msgs::State m_current_state;
     geometry_msgs::PoseStamped m_msgs_setpoint;

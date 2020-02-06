@@ -35,10 +35,11 @@ Client::Client(
 {
     m_pub_setpoint = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
     m_pub_externalPose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/vision_pose/pose", 10);
-    m_pub_emergencyStop = m_rosNodeHandle.advertise<mavros_msgs::OverrideRCIn>("mavros/rc/override", 10);
+    
     m_sub_current_state = m_rosNodeHandle.subscribe<mavros_msgs::State>("mavros/state", 10, &Client::mavros_state_callback, this);
     m_arming_client = m_rosNodeHandle.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
     m_set_mode_client = m_rosNodeHandle.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
+    m_emergency_stop_client = m_rosNodeHandle.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/emergency_stop");
 
     int datarate;
     int channel;
@@ -230,13 +231,8 @@ void Client::takeoff(const uint8_t* data) {
                                    << ", y: " << m_msgs_setpoint.pose.position.y
                                    << ", z: " << m_msgs_setpoint.pose.position.z);
 
-
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
-
-    mavros_msgs::CommandBool arm_cmd;
-    arm_cmd.request.value = true;
-
     if( m_current_state.mode != "OFFBOARD"){
         if( m_set_mode_client.call(offb_set_mode) && offb_set_mode.response.mode_sent){
             ROS_INFO("[MAVSWARM_CLIENT] Offboard enabled");
@@ -247,7 +243,8 @@ void Client::takeoff(const uint8_t* data) {
     	}
     }
 
-    
+    mavros_msgs::CommandBool arm_cmd;
+    arm_cmd.request.value = true;
     if( !m_current_state.armed ){
         if( m_arming_client.call(arm_cmd) && arm_cmd.response.success){
             ROS_INFO("[MAVSWARM_CLIENT] Vehicle armed");
@@ -260,35 +257,15 @@ void Client::takeoff(const uint8_t* data) {
 }
 
 void Client::emergencyStop() {
-    ROS_WARN("[MAVSWARM_CLIENT] Emergency stop engaged");
-//    m_is_emergency = true;
-
-    mavros_msgs::SetMode manual_set_mode;
-    manual_set_mode.request.custom_mode = "AUTO.LAND";
-
-    if( m_set_mode_client.call(manual_set_mode) && manual_set_mode.response.mode_sent){
-        ROS_INFO("[MAVSWARM_CLIENT] Land enabled");
+    mavros_msgs::CommandBool emergency_stop_cmd;
+    emergency_stop_cmd.request.value = false;
+    if( m_emergency_stop_client.call(emergency_stop_cmd) && emergency_stop_cmd.response.success){
+        ROS_WARN("[MAVSWARM_CLIENT] Emergency stop success");
     }
     else{
-        ROS_ERROR("[MAVSWARM_CLIENT] Land failed");
+        ROS_ERROR("[MAVSWARM_CLIENT] Emergency stop failed");
         return;
     }
-
-
-
-//    mavros_msgs::CommandBool arm_cmd;
-//   arm_cmd.request.value = false;
-
-//    if( m_current_state.armed ){
-//        if( m_arming_client.call(arm_cmd) && arm_cmd.response.success){
-//            ROS_INFO("[MAVSWARM_CLIENT] Vehicle disarmed");
-//        }
-//        else{
-//            ROS_ERROR("[MAVSWARM_CLIENT] Disarming failed");
-//            return;
-//        }
-//    }
-
 }
 
 void Client::mavros_state_callback(const mavros_msgs::State::ConstPtr& msg){
@@ -305,11 +282,6 @@ void Client::publishMsgs(ros::Rate rate_max) {
     // publish setpoint
     m_msgs_setpoint.header.stamp = ros::Time::now();
     m_pub_setpoint.publish(m_msgs_setpoint);
-
-    // publish emergency stop
-    if(m_is_emergency){
-        m_pub_emergencyStop.publish(m_msgs_emergencyStop);
-    }
 
     m_last_pub_time = ros::Time::now();
 }
