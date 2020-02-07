@@ -183,7 +183,7 @@ void Client::handleData(const uint8_t* data){
     }
     // High level setpoint - goto
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 4){
-
+        goTo(data);
     }
     // High level setpoint - start trajectory
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 5){
@@ -227,9 +227,9 @@ void Client::takeoff(const uint8_t* data) {
     // initialize setpoint
     m_msgs_setpoint = m_msgs_extPose;
     m_msgs_setpoint.pose.position.z = cmd_takeoff_crtp->height;
-    ROS_INFO_STREAM("Initilize setpoint, x: " << m_msgs_setpoint.pose.position.x
-                                   << ", y: " << m_msgs_setpoint.pose.position.y
-                                   << ", z: " << m_msgs_setpoint.pose.position.z);
+    ROS_INFO_STREAM("[MAVSWARM_CLIENT] Initilize setpoint, x: " << m_msgs_setpoint.pose.position.x
+                                                     << ", y: " << m_msgs_setpoint.pose.position.y
+                                                     << ", z: " << m_msgs_setpoint.pose.position.z);
 
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
@@ -254,6 +254,23 @@ void Client::takeoff(const uint8_t* data) {
             return;
         }
     }
+}
+
+void Client::goTo(const uint8_t* data) {
+    auto cmd_goto_crtp = (crtpCommanderHighLevelGoToRequest*)data;
+
+    m_msgs_setpoint.pose.position.x = cmd_goto_crtp->x;
+    m_msgs_setpoint.pose.position.y = cmd_goto_crtp->y;
+    m_msgs_setpoint.pose.position.z = cmd_goto_crtp->z;
+    m_msgs_setpoint.pose.orientation.w = cos(cmd_goto_crtp->yaw/2);
+    m_msgs_setpoint.pose.orientation.x = 0;
+    m_msgs_setpoint.pose.orientation.y = 0;
+    m_msgs_setpoint.pose.orientation.z = sin(cmd_goto_crtp->yaw/2);;
+
+    ROS_INFO_STREAM("[MAVSWARM_CLIENT] go to setpoint, x: "   << m_msgs_setpoint.pose.position.x
+                                                 << ", y: "   << m_msgs_setpoint.pose.position.y
+                                                 << ", z: "   << m_msgs_setpoint.pose.position.z
+                                                 << ", yaw: " << cmd_goto_crtp->yaw); 
 }
 
 void Client::emergencyStop() {

@@ -58,7 +58,6 @@ private:
     double m_link_rate;
 
     // state
-
     bool m_is_extPose_received;
     bool m_is_emergency;
 
@@ -68,6 +67,7 @@ private:
 
     void receiveExternalPose(const uint8_t* data);
     void takeoff(const uint8_t* data);
+    void goTo(const uint8_t* data);
     void emergencyStop();
 
     void mavros_state_callback(const mavros_msgs::State::ConstPtr& msg);
