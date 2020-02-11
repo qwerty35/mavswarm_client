@@ -15,6 +15,7 @@
 #include <cmath>
 #include <inttypes.h>
 #include <iostream>
+#include <crtp.h>
 
 const static int MAX_RADIOS = 1;
 
@@ -73,7 +74,7 @@ Client::Client(
         {
             m_radio = new Crazyradio(m_devId);
             m_radio->setAckEnable(true);
-            m_radio->setArc(0);
+            m_radio->setArc(3);
             m_radio->setChannel(m_channel);
             m_radio->setAddress(m_address); // mav address
             m_radio->setAddr2(0xFFE7E7E7E7); // broadcast address
@@ -82,15 +83,9 @@ Client::Client(
         }
     }
 
+    m_msgs_extPose.header.frame_id = "world";
     m_is_extPose_received = false;
-    m_is_emergency = false;
-
-    for(int i = 0; i < 8; i++){
-        if(i == m_kill_switch_channel)
-            m_msgs_emergencyStop.channels[i] = 2070;
-        else
-            m_msgs_emergencyStop.channels[i] = 1500;
-    }
+    m_startTrajectory = false;
 }
 
 void Client::run() {
@@ -131,12 +126,13 @@ void Client::run() {
             start_time = ros::Time::now();
         }
 
+        updateSetpoints();
         publishMsgs(rate_max);
         ros::spinOnce();
     }
 }
 
-void Client::handleData(const uint8_t* data){
+void Client::handleData(uint8_t* data){
     // external pose
     if(crtp(data[0]) == crtp(6, 1) && data[1] == 9){
         receiveExternalPose(data);
@@ -152,48 +148,72 @@ void Client::handleData(const uint8_t* data){
     uint32_t ack_size = 0;
     // ping
     if(crtp(data[0]) == crtp(15, 3)) {
-        ack[0] = 0x22; //console ack
-        ack_size = 4;
+//        ack[0] = 0x00;
+//        ack[1] = 0x05;
+        data[0] = 0x00;
+        data[1] = 0x05;
+        ack_size = 2;
+    }
+//    // log reset
+//    else if(crtp(data[0]) == crtp(5, 1)){
+//        ack[0] = 0x51;
+//        ack[1] = 0x05;
+//        ack_size = 4;
+//    }
+    // write memory
+    else if(crtp(data[0]) == crtp(4, 2)) {
+        writeMemory(data);
 
-    }
-    // log reset
-    else if(crtp(data[0]) == crtp(5, 1)){
-        ack[0] = 0x51;
-        ack[1] = 0x05;
-        ack_size = 4;
-    }
-    // request memory
-    else if(crtp(data[0]) == crtp(4, 0)) {
-        ack[0] = 0x40;
-        ack[1] = 0x01;
-        ack_size = 3;
+        data[5] = 0;
+        ack_size = 6;
     }
     // High level setpoint - take off
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 1){
         takeoff(data);
-        return; //TODO: ack??
+
+        data[3] = 0;
+        ack_size = 4;
     }
     // High level setpoint - land
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 2){
+        land(data);
 
+        data[3] = 0;
+        ack_size = 4;
     }
     // High level setpoint - stop
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 3){
-        
+        data[3] = 0;
+        ack_size = 4;
     }
     // High level setpoint - goto
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 4){
         goTo(data);
+
+        data[3] = 0;
+        ack_size = 4;
     }
     // High level setpoint - start trajectory
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 5){
+        startTrajectory(data);
 
+        data[3] = 0;
+        ack_size = 4;
+    }
+    // High level setpoint - define trajectory
+    else if(crtp(data[0]) == crtp(8, 0) && data[1] == 6){
+        uploadTrajectory(data);
+
+        data[3] = 0;
+        ack_size = 4;
     }
     else{
         ROS_ERROR("[MAVSWARM_CLIENT] unsupported crtp message");
         return;
     }
-    m_radio->sendPacketNoAck((uint8_t*)&ack, ack_size);
+//    m_radio->sendPacketNoAck((uint8_t*)&ack, ack_size);
+    m_radio->sendPacketNoAck(data, ack_size);
+    int debug = 0;
 }
 
 void Client::receiveExternalPose(const uint8_t* data) {
@@ -215,6 +235,89 @@ void Client::receiveExternalPose(const uint8_t* data) {
             m_msgs_extPose.pose.orientation.w = q[3];
         }
     }
+}
+
+void Client::writeMemory(const uint8_t* data){
+    auto cmd_writeMem_crtp = (crtpMemoryWriteRequest*)data;
+    std::array<uint8_t, 24> data_container;
+    std::move(std::begin(cmd_writeMem_crtp->data), std::end(cmd_writeMem_crtp->data), data_container.begin());
+    m_traj_rawdata.emplace_back(data_container);
+}
+
+void Client::uploadTrajectory(const uint8_t* data){
+    auto def_traj_crtp = (crtpCommanderHighLevelDefineTrajectoryRequest*)data;
+    ROS_INFO_STREAM("traj id: " << (int)def_traj_crtp->trajectoryId);
+    if(def_traj_crtp->description.trajectoryType != TRAJECTORY_TYPE_POLY4D){
+        ROS_ERROR("[MAVSWARM_CLIENT] trajectory type is not poly4d");
+        return;
+    }
+    uint8_t n_pieces = def_traj_crtp->description.trajectoryIdentifier.mem.n_pieces;
+
+    //TODO: traj check
+    auto temp = reinterpret_cast<Crazyflie::poly4d*>(m_traj_rawdata.data());
+    m_traj_coef.resize(n_pieces);
+    for(int i = 0; i < n_pieces; i++){
+        m_traj_coef[i] = temp[i];
+    }
+
+    ROS_INFO_STREAM("[MAVSWARM_CLIENT] upload trajectory complete, last duration: " << m_traj_coef[n_pieces - 1].duration);
+}
+
+void Client::startTrajectory(const uint8_t *data) {
+    auto cmd_startTraj_crtp = (crtpCommanderHighLevelStartTrajectoryRequest*)data;
+    if(cmd_startTraj_crtp->relative){
+        ROS_ERROR("[MAVSWARM_CLIENT] relative trajectory is not supported yet");
+        return;
+    }
+    if(cmd_startTraj_crtp->reversed){
+        ROS_ERROR("[MAVSWARM_CLIENT] reverse trajectory is not supported yet");
+        return;
+    }
+
+    m_start_time = ros::Time::now();
+    m_startTrajectory = true;
+}
+
+void Client::updateSetpoints(){
+    if(!m_startTrajectory){
+        return;
+    }
+    double current_time = (ros::Time::now() - m_start_time).toSec();
+
+    double t, seg_start_time = 0;
+    int m_curr;
+    // find segment start time;
+    for(int m = 0; m < m_traj_coef.size(); m++){
+        if(current_time > seg_start_time + m_traj_coef[m].duration){
+            seg_start_time += m_traj_coef[m].duration;
+        }
+        else{
+            m_curr = m;
+            break;
+        }
+    }
+
+    // check trajectory is over
+    if(m_curr >= m_traj_coef.size()){
+        m_startTrajectory = false;
+        return;
+    }
+    else{
+        t = current_time - seg_start_time;
+    }
+
+    double x = 0, y = 0, z = 0, yaw = 0;
+    for(int i = 0; i < 8; i++){
+        x += m_traj_coef[m_curr].p[0][i] * pow(t,i);
+        y += m_traj_coef[m_curr].p[1][i] * pow(t,i);
+        z += m_traj_coef[m_curr].p[2][i] * pow(t,i);
+        yaw += m_traj_coef[m_curr].p[3][i] * pow(t,i);
+    }
+    m_msgs_setpoint.pose.position.x = x;
+    m_msgs_setpoint.pose.position.y = y;
+    m_msgs_setpoint.pose.position.z = z;
+    m_msgs_setpoint.pose.orientation.w = cos(yaw/2);
+    m_msgs_setpoint.pose.orientation.z = sin(yaw/2);
 }
 
 void Client::takeoff(const uint8_t* data) {
@@ -271,6 +374,28 @@ void Client::goTo(const uint8_t* data) {
                                                  << ", y: "   << m_msgs_setpoint.pose.position.y
                                                  << ", z: "   << m_msgs_setpoint.pose.position.z
                                                  << ", yaw: " << cmd_goto_crtp->yaw); 
+}
+
+void Client::land(const uint8_t* data){
+    auto cmd_land_crtp = (crtpCommanderHighLevelLandRequest*)data;
+
+    m_msgs_setpoint = m_msgs_extPose;
+    m_msgs_setpoint.pose.position.z = 0.00;
+    ROS_INFO_STREAM("[MAVSWARM_CLIENT] Landing setpoint, x: " << m_msgs_setpoint.pose.position.x
+                                                          << ", y: " << m_msgs_setpoint.pose.position.y
+                                                          << ", z: " << m_msgs_setpoint.pose.position.z);
+
+    mavros_msgs::SetMode land_set_mode;
+    land_set_mode.request.custom_mode = "AUTO.LAND";
+    if( m_current_state.mode != "AUTO.LAND"){
+        if( m_set_mode_client.call(land_set_mode) && land_set_mode.response.mode_sent){
+            ROS_INFO("[MAVSWARM_CLIENT] Landing enabled");
+        }
+        else{
+            ROS_ERROR("[MAVSWARM_CLIENT] Landing failed");
+            return;
+        }
+    }
 }
 
 void Client::emergencyStop() {

@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include "Crazyradio.h"
+#include "Crazyflie.h"
 #include "crtp.h"
 #include <list>
 #include <set>
@@ -33,7 +34,6 @@ private:
     ros::NodeHandle m_rosNodeHandle;
     ros::Publisher m_pub_externalPose;
     ros::Publisher m_pub_setpoint;
-    ros::Publisher m_pub_emergencyStop;
     ros::Subscriber m_sub_current_state;
     ros::ServiceClient m_arming_client;
     ros::ServiceClient m_set_mode_client;
@@ -42,9 +42,13 @@ private:
     mavros_msgs::State m_current_state;
     geometry_msgs::PoseStamped m_msgs_setpoint;
     geometry_msgs::PoseStamped m_msgs_extPose;
-    mavros_msgs::OverrideRCIn m_msgs_emergencyStop;
 
     ros::Time m_last_pub_time;
+    ros::Time m_start_time;
+
+    // trajectory
+    std::vector<std::array<uint8_t, 24>> m_traj_rawdata;
+    std::vector<Crazyflie::poly4d> m_traj_coef;
 
     // crazyradio
     Crazyradio* m_radio;
@@ -59,16 +63,20 @@ private:
 
     // state
     bool m_is_extPose_received;
-    bool m_is_emergency;
+    bool m_startTrajectory;
 
-
-    void handleData(const uint8_t* data);
+    void handleData(uint8_t* data);
     void publishMsgs(ros::Rate rate_max);
 
     void receiveExternalPose(const uint8_t* data);
+    void writeMemory(const uint8_t* data);
+    void startTrajectory(const uint8_t* data);
+    void uploadTrajectory(const uint8_t* data);
     void takeoff(const uint8_t* data);
     void goTo(const uint8_t* data);
+    void land(const uint8_t* data);
     void emergencyStop();
+    void updateSetpoints();
 
     void mavros_state_callback(const mavros_msgs::State::ConstPtr& msg);
     void quatextract(uint32_t quat, float* q);
