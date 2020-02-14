@@ -148,10 +148,7 @@ void Client::handleData(uint8_t* data){
     uint32_t ack_size = 0;
     // ping
     if(crtp(data[0]) == crtp(15, 3)) {
-//        ack[0] = 0x00;
-//        ack[1] = 0x05;
-        data[0] = 0x00;
-        data[1] = 0x05;
+        data[0] = 0x00 | (data[0] & 0x0c);
         ack_size = 2;
     }
 //    // log reset
@@ -238,8 +235,9 @@ void Client::receiveExternalPose(const uint8_t* data) {
 }
 
 void Client::writeMemory(const uint8_t* data){
+    auto cmd_writeMem_crtp = (crtpMemoryWriteRequest*)data;
     m_traj_rawdata.resize(m_traj_rawdata.size() + 1);
-    std::memcpy(m_traj_rawdata.back(), data, 24);
+    std::move(std::begin(cmd_writeMem_crtp->data), std::end(cmd_writeMem_crtp->data), m_traj_rawdata.back().begin());
 }
 
 void Client::uploadTrajectory(const uint8_t* data){
@@ -256,6 +254,7 @@ void Client::uploadTrajectory(const uint8_t* data){
     m_traj_coef.resize(n_pieces);
     for(int i = 0; i < n_pieces; i++){
         m_traj_coef[i] = temp[i];
+        ROS_INFO_STREAM("x"<< std::to_string(i) << ": " << m_traj_coef[i].p[0][0] << " " << m_traj_coef[i].p[0][1] << " " << m_traj_coef[i].p[0][2] << " " << m_traj_coef[i].p[0][3] << " " << m_traj_coef[i].p[0][4] << " " << m_traj_coef[i].p[0][5] << " " << m_traj_coef[i].p[0][6] << " " << m_traj_coef[i].p[0][7] );
         ROS_INFO_STREAM("T"<< std::to_string(i) << ": " << m_traj_coef[i].duration);
     }
 
