@@ -238,10 +238,8 @@ void Client::receiveExternalPose(const uint8_t* data) {
 }
 
 void Client::writeMemory(const uint8_t* data){
-    auto cmd_writeMem_crtp = (crtpMemoryWriteRequest*)data;
-    std::array<uint8_t, 24> data_container;
-    std::move(std::begin(cmd_writeMem_crtp->data), std::end(cmd_writeMem_crtp->data), data_container.begin());
-    m_traj_rawdata.emplace_back(data_container);
+    m_traj_rawdata.resize(m_traj_rawdata.size() + 1);
+    std::memcpy(m_traj_rawdata.back(), data, 24);
 }
 
 void Client::uploadTrajectory(const uint8_t* data){
@@ -258,9 +256,10 @@ void Client::uploadTrajectory(const uint8_t* data){
     m_traj_coef.resize(n_pieces);
     for(int i = 0; i < n_pieces; i++){
         m_traj_coef[i] = temp[i];
+        ROS_INFO_STREAM("T"<< std::to_string(i) << ": " << m_traj_coef[i].duration);
     }
 
-    ROS_INFO_STREAM("[MAVSWARM_CLIENT] upload trajectory complete, last duration: " << m_traj_coef[n_pieces - 1].duration);
+    ROS_INFO("[MAVSWARM_CLIENT] upload trajectory complete");
 }
 
 void Client::startTrajectory(const uint8_t *data) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <arg name="uri" default = "radio://0/50/2M/E7E7E7E701"/>
-    <arg name="mav_id" default = "1"/>
+    <arg name="uri" default = "radio://0/50/2M/E7E7E7E702"/>
+    <arg name="mav_id" default = "2"/>
     <arg name="frame_id" default = "/world"/>
 
         <node name="client_node" pkg="mavswarm_client" type="client_node" output="screen">
