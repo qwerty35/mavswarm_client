@@ -60,10 +60,12 @@ private:
     Crazyradio::Datarate m_datarate;
     double m_link_quality;
     double m_link_rate;
+    uint8_t m_link;
 
     // state
     bool m_is_extPose_received;
     bool m_startTrajectory;
+    bool m_haveTrajectory;
 
     void handleData(uint8_t* data);
     void publishMsgs(ros::Rate rate_max);
@@ -80,5 +82,6 @@ private:
 
     void mavros_state_callback(const mavros_msgs::State::ConstPtr& msg);
     void quatextract(uint32_t quat, float* q);
+    bool is_duplicated_message(const uint8_t* data);
 };
 

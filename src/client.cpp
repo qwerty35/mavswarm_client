@@ -86,6 +86,12 @@ Client::Client(
     m_msgs_extPose.header.frame_id = "world";
     m_is_extPose_received = false;
     m_startTrajectory = false;
+    m_haveTrajectory = false;
+    m_link = 0xFF;
+
+    uint8_t data[32];
+    uint32_t length;
+    m_radio->receivePacket(data, length);
 }
 
 void Client::run() {
@@ -148,18 +154,18 @@ void Client::handleData(uint8_t* data){
     uint32_t ack_size = 0;
     // ping
     if(crtp(data[0]) == crtp(15, 3)) {
-        data[0] = 0x00 | (data[0] & 0x0c);
+        data[0] = data[0] & 0x0c;
         ack_size = 2;
     }
-//    // log reset
-//    else if(crtp(data[0]) == crtp(5, 1)){
-//        ack[0] = 0x51;
-//        ack[1] = 0x05;
-//        ack_size = 4;
-//    }
     // write memory
     else if(crtp(data[0]) == crtp(4, 2)) {
-        writeMemory(data);
+        ROS_INFO_STREAM("data link" << (data[0] & 0x0c));
+        ROS_INFO_STREAM("m_link" << int(m_link));
+
+        if(!is_duplicated_message(data)){
+            writeMemory(data);
+            m_link = (data[0] & 0x0c);
+        }
 
         data[5] = 0;
         ack_size = 6;
@@ -199,8 +205,11 @@ void Client::handleData(uint8_t* data){
     }
     // High level setpoint - define trajectory
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 6){
-        uploadTrajectory(data);
+        if(!is_duplicated_message(data)){
+            uploadTrajectory(data);
+        }
 
+        
         data[3] = 0;
         ack_size = 4;
     }
@@ -241,6 +250,11 @@ void Client::writeMemory(const uint8_t* data){
 }
 
 void Client::uploadTrajectory(const uint8_t* data){
+    if(m_traj_rawdata.empty()){
+        ROS_INFO("[MAVSWARM_CLIENT] memory is empty, duplicated upload message?");
+        return;
+    }
+
     auto def_traj_crtp = (crtpCommanderHighLevelDefineTrajectoryRequest*)data;
     ROS_INFO_STREAM("traj id: " << (int)def_traj_crtp->trajectoryId);
     if(def_traj_crtp->description.trajectoryType != TRAJECTORY_TYPE_POLY4D){
@@ -250,18 +264,25 @@ void Client::uploadTrajectory(const uint8_t* data){
     uint8_t n_pieces = def_traj_crtp->description.trajectoryIdentifier.mem.n_pieces;
 
     //TODO: traj check
-    auto temp = reinterpret_cast<Crazyflie::poly4d*>(m_traj_rawdata.data());
+    auto piece = reinterpret_cast<Crazyflie::poly4d*>(m_traj_rawdata.data());
     m_traj_coef.resize(n_pieces);
     for(int i = 0; i < n_pieces; i++){
-        m_traj_coef[i] = temp[i];
-        ROS_INFO_STREAM("x"<< std::to_string(i) << ": " << m_traj_coef[i].p[0][0] << " " << m_traj_coef[i].p[0][1] << " " << m_traj_coef[i].p[0][2] << " " << m_traj_coef[i].p[0][3] << " " << m_traj_coef[i].p[0][4] << " " << m_traj_coef[i].p[0][5] << " " << m_traj_coef[i].p[0][6] << " " << m_traj_coef[i].p[0][7] );
+        m_traj_coef[i] = piece[i];
+        //ROS_INFO_STREAM("x"<< std::to_string(i) << ": " << m_traj_coef[i].p[0][0] << " " << m_traj_coef[i].p[0][1] << " " << m_traj_coef[i].p[0][2] << " " << m_traj_coef[i].p[0][3] << " " << m_traj_coef[i].p[0][4] << " " << m_traj_coef[i].p[0][5] << " " << m_traj_coef[i].p[0][6] << " " << m_traj_coef[i].p[0][7] );
         ROS_INFO_STREAM("T"<< std::to_string(i) << ": " << m_traj_coef[i].duration);
     }
 
-    ROS_INFO("[MAVSWARM_CLIENT] upload trajectory complete");
+    ROS_INFO_STREAM("[MAVSWARM_CLIENT] upload trajectory complete, total transferred packet: "  << m_traj_rawdata.size());
+    m_traj_rawdata.clear();
+    m_haveTrajectory = true;
 }
 
 void Client::startTrajectory(const uint8_t *data) {
+    if(!m_haveTrajectory){
+        ROS_ERROR("[MAVSWARM_CLIENT] the trajectory is not updated yet");
+        return;
+    }
+
     auto cmd_startTraj_crtp = (crtpCommanderHighLevelStartTrajectoryRequest*)data;
     if(cmd_startTraj_crtp->relative){
         ROS_ERROR("[MAVSWARM_CLIENT] relative trajectory is not supported yet");
@@ -441,6 +462,14 @@ void Client::quatextract(uint32_t quat, float* q){
         }
     }
     q[i_largest] = sqrt(1 - ssum);
+}
+
+bool Client::is_duplicated_message(const uint8_t *data) {
+    bool ret = false;
+    if(m_link != 0xFF){
+        ret = (m_link == (data[0] & 0x0c));
+    }
+    return ret;
 }
 
 
