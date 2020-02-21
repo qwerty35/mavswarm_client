@@ -1,11 +1,12 @@
 #pragma once
 #include "ros/ros.h"
 #include "geometry_msgs/PoseStamped.h"
+#include <tf/transform_listener.h>
 
 #include <cstring>
 #include <sstream>
 #include <functional>
-#include <math.h>
+#include <cmath>
 
 #include "Crazyradio.h"
 #include "Crazyflie.h"
@@ -18,7 +19,7 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
-#include <mavros_msgs/OverrideRCIn.h>
+#include <mavros_msgs/PositionTarget.h>
 
 #define ENABLE_SAFELINK 1
 
@@ -32,19 +33,24 @@ private:
     std::string m_frame_id;
 
     ros::NodeHandle m_rosNodeHandle;
-    ros::Publisher m_pub_externalPose;
+    ros::Publisher m_pub_external_pose;
     ros::Publisher m_pub_setpoint;
+    ros::Publisher m_pub_setpoint_raw;
+    ros::Publisher m_pub_camera_odom;
     ros::Subscriber m_sub_current_state;
     ros::ServiceClient m_arming_client;
     ros::ServiceClient m_set_mode_client;
     ros::ServiceClient m_emergency_stop_client;
+    tf::TransformListener tf_listener;
 
     mavros_msgs::State m_current_state;
     geometry_msgs::PoseStamped m_msgs_setpoint;
+    mavros_msgs::PositionTarget m_msgs_setpoint_raw;
     geometry_msgs::PoseStamped m_msgs_extPose;
 
     ros::Time m_last_pub_time;
-    ros::Time m_start_time;
+    ros::Time m_traj_start_time;
+    ros::Time m_latest_goto_time;
 
     // trajectory
     std::vector<std::array<uint8_t, 24>> m_traj_rawdata;

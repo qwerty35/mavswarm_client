@@ -1,25 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <arg name="uri" default = "radio://0/50/2M/E7E7E7E702"/>
-    <arg name="mav_id" default = "2"/>
+    <arg name="rosbag"   default = "true"/>
+    <arg name="uri"      default = "radio://0/50/2M/E7E7E7E701"/>
+    <arg name="mav_id"   default = "1"/>
     <arg name="frame_id" default = "/world"/>
 
-        <node name="client_node" pkg="mavswarm_client" type="client_node" output="screen">
-            <param name="uri" value="$(arg uri)"/>
-            <param name="mav_id" value="$(arg mav_id)"/>
-            <param name="frame_id" value="$(arg frame_id)"/>
-        </node>
+    <node name="client_node" pkg="mavswarm_client" type="client_node" output="screen">
+        <param name="uri" value="$(arg uri)"/>
+        <param name="mav_id" value="$(arg mav_id)"/>
+        <param name="frame_id" value="$(arg frame_id)"/>
+    </node>
         
-        <include file="$(find mavros)/launch/px4.launch">
-	
-	</include>
+    <include file="$(find mavros)/launch/px4.launch" />
 
-        <!--mav wrapper-->
-        <!--node name="mav_wrapper_node" pkg="px4_code" type="mav_wrapper_node" output="screen">   
-            <param name="mav_frame_id" value="/mav1/mavswarm_client/pose"/>
-            <param name="world_frame_id" value="/world"/>
-            <param name="external_pose_topic" value="/mav1/mavswarm_client/pose"/>
-
-            <param name="pose_on" value="true"/>
-        </node-->
+    <node pkg="rosbag" type="record" name="rosbag"
+        args="record -O $(find mavswarm_client)/log/LastFlight.bag /mavros/setpoint_position/local /mavros/setpoint_raw/local /mavros/vision_pose/pose /mavswarm_client/camera_pose"
+        if="$(arg rosbag)" />
 </launch>
