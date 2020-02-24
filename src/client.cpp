@@ -501,6 +501,7 @@ void Client::publishMsgs(ros::Rate rate_max) {
 
         geometry_msgs::PoseStamped camera_pose;
         camera_pose.header.stamp = ros::Time::now();
+        camera_pose.header.frame_id = m_frame_id;
         camera_pose.pose.position.x = transform.getOrigin().x();
         camera_pose.pose.position.y = transform.getOrigin().y();
         camera_pose.pose.position.z = transform.getOrigin().z();
