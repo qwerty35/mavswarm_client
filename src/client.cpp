@@ -19,38 +19,40 @@
 
 const static int MAX_RADIOS = 1;
 
-Client::Client(
-        const std::string& link_uri,
-        int mav_id,
-        const std::string& frame_id,
-        int kill_switch_channel)
+Client::Client()
         : m_radio(nullptr)
         , m_transport(nullptr)
-        , m_mavId(mav_id)
-        , m_devId(0)
+        , m_dev_id(0)
         , m_channel(0)
         , m_address(0)
         , m_datarate(Crazyradio::Datarate_250KPS)
-        , m_frame_id(frame_id)
-        , m_kill_switch_channel(kill_switch_channel)
 {
-    m_pub_setpoint = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
-    m_pub_setpoint_raw = m_rosNodeHandle.advertise<mavros_msgs::PositionTarget>("mavros/setpoint_raw/local", 10);
-    m_pub_external_pose = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavros/vision_pose/pose", 10);
-    m_pub_camera_odom = m_rosNodeHandle.advertise<geometry_msgs::PoseStamped>("mavswarm_client/camera_pose", 10);
+    m_nh = ros::NodeHandle("~");
+    m_pub_setpoint = m_nh.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
+    m_pub_setpoint_raw = m_nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
+    m_pub_mocap_pose = m_nh.advertise<geometry_msgs::PoseStamped>("/mavswarm_client/mocap_pose", 10);
+    m_pub_camera_odom = m_nh.advertise<geometry_msgs::PoseStamped>("/mavswarm_client/camera_pose", 10);
+    m_pub_vision_pose = m_nh.advertise<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose", 10);
     
-    m_sub_current_state = m_rosNodeHandle.subscribe<mavros_msgs::State>("mavros/state", 10, &Client::mavros_state_callback, this);
-    m_arming_client = m_rosNodeHandle.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
-    m_set_mode_client = m_rosNodeHandle.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
-    m_emergency_stop_client = m_rosNodeHandle.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/emergency_stop");
+    m_sub_current_state = m_nh.subscribe<mavros_msgs::State>("/mavros/state", 10, &Client::mavrosStateCallback, this);
+    m_arming_client = m_nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
+    m_set_mode_client = m_nh.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
+    m_emergency_stop_client = m_nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/emergency_stop");
+
+    m_nh.param<std::string>("uri", m_mav_uri, "radio://0/50/2M/E7E7E7E701");
+    m_nh.param<int>("mav_id", m_mav_id, 1);
+    m_nh.param<std::string>("frame_id", m_frame_id, "/world");
+    m_nh.param<bool>("mocap_exist", m_mocap_exist, false);
+    m_nh.param<bool>("camera_exist", m_camera_exist, false);
+    m_nh.param<bool>("use_vio", m_use_vio, false);
 
     int datarate;
     int channel;
     char datarateType;
     bool success = false;
 
-    success = std::sscanf(link_uri.c_str(), "radio://%d/%d/%d%c/%" SCNx64,
-            &m_devId, &channel, &datarate,
+    success = std::sscanf(m_mav_uri.c_str(), "radio://%d/%d/%d%c/%" SCNx64,
+            &m_dev_id, &channel, &datarate,
             &datarateType, &m_address) == 5;
     if (!success) {
         throw std::runtime_error("Uri is not valid!");
@@ -69,12 +71,12 @@ Client::Client(
             m_datarate = Crazyradio::Datarate_2MPS;
         }
 
-        if (m_devId >= MAX_RADIOS) {
+        if (m_dev_id >= MAX_RADIOS) {
             throw std::runtime_error("This version does not support that many radios. Adjust MAX_RADIOS and recompile!");
         }
 
         {
-            m_radio = new Crazyradio(m_devId);
+            m_radio = new Crazyradio(m_dev_id);
             m_radio->setAckEnable(true);
             m_radio->setArc(3);
             m_radio->setChannel(m_channel);
@@ -85,8 +87,9 @@ Client::Client(
         }
     }
 
-    m_msgs_extPose.header.frame_id = "world";
-    m_is_extPose_received = false;
+    m_msgs_camera_pose.header.frame_id = m_frame_id;
+    m_msgs_mocap_pose.header.frame_id = m_frame_id;
+    m_vision_pose_updated = false;
     m_startTrajectory = false;
     m_haveTrajectory = false;
     m_link = 0xFF;
@@ -113,14 +116,13 @@ void Client::run() {
 
     ROS_INFO("[MAVSWARM_CLIENT] Start mavswarm_client");
     while(ros::ok()){
+        // Receive packet from crazyradio
         if (!m_radio->receivePacket(data, length)) {
-            ROS_WARN("[MAVSWARM_CLIENT] ping failed");
-            m_is_extPose_received = false;
+            if(!m_use_vio){
+                m_vision_pose_updated = false;
+            }
         }
         else{
-            if(!m_is_extPose_received) {
-                m_is_extPose_received = true;
-            }
             handleData(data);
             ping_count++;
         }
@@ -128,11 +130,13 @@ void Client::run() {
 
         // link quality and rate
         if(trial_count == count_max){
-            m_link_quality = (double)ping_count/(double)trial_count;
-            m_link_rate = (double)ping_count / (ros::Time::now() - start_time).toSec();
+            if(!m_use_vio) {
+                m_link_quality = (double) ping_count / (double) trial_count;
+                m_link_rate = (double) ping_count / (ros::Time::now() - start_time).toSec();
 
-            ROS_INFO_STREAM("[MAVSWARM_CLIENT] link_quality: " << m_link_quality << ", link_rate: " << m_link_rate << "Hz");
-
+                ROS_INFO_STREAM(
+                        "[MAVSWARM_CLIENT] link_quality: " << m_link_quality << ", link_rate: " << m_link_rate << "Hz");
+            }
             trial_count = 0;
             ping_count = 0;
             start_time = ros::Time::now();
@@ -145,9 +149,9 @@ void Client::run() {
 }
 
 void Client::handleData(uint8_t* data){
-    // external pose
+    // mocap pose
     if(crtp(data[0]) == crtp(6, 1) && data[1] == 9){
-        receiveExternalPose(data);
+        receiveMocapPose(data);
         return;
     }
     // emergency stop
@@ -165,10 +169,10 @@ void Client::handleData(uint8_t* data){
     }
     // write memory
     else if(crtp(data[0]) == crtp(4, 2)) {
-        ROS_INFO_STREAM("data link" << (data[0] & 0x0c));
-        ROS_INFO_STREAM("m_link" << int(m_link));
+//        ROS_INFO_STREAM("data link" << (data[0] & 0x0c));
+//        ROS_INFO_STREAM("m_link" << int(m_link));
 
-        if(!is_duplicated_message(data)){
+        if(!isDuplicatedMessage(data)){
             writeMemory(data);
             m_link = (data[0] & 0x0c);
         }
@@ -211,7 +215,7 @@ void Client::handleData(uint8_t* data){
     }
     // High level setpoint - define trajectory
     else if(crtp(data[0]) == crtp(8, 0) && data[1] == 6){
-        if(!is_duplicated_message(data)){
+        if(!isDuplicatedMessage(data)){
             uploadTrajectory(data);
             m_link = (data[0] & 0x0c);
         }
@@ -227,23 +231,27 @@ void Client::handleData(uint8_t* data){
     m_radio->sendPacketNoAck(data, ack_size);
 }
 
-void Client::receiveExternalPose(const uint8_t* data) {
+void Client::receiveMocapPose(const uint8_t* data) {
     auto extPose_crtp = (crtpExternalPosePacked*)data;
-    for(int i = 0; i < 2; i++) {
-        if (m_mavId == extPose_crtp->poses[i].id) {
-            m_msgs_extPose.header.frame_id = m_frame_id;
-            m_msgs_extPose.header.stamp = ros::Time::now();
 
-            m_msgs_extPose.pose.position.x = (float)extPose_crtp->poses[i].x/1000;
-            m_msgs_extPose.pose.position.y = (float)extPose_crtp->poses[i].y/1000;
-            m_msgs_extPose.pose.position.z = (float)extPose_crtp->poses[i].z/1000;
+    if(!m_use_vio) {
+        m_vision_pose_updated = true;
+    }
+
+    for(int i = 0; i < 2; i++) {
+        if (m_mav_id == extPose_crtp->poses[i].id) {
+            m_msgs_mocap_pose.header.stamp = ros::Time::now();
+
+            m_msgs_mocap_pose.pose.position.x = (float)extPose_crtp->poses[i].x/1000;
+            m_msgs_mocap_pose.pose.position.y = (float)extPose_crtp->poses[i].y/1000;
+            m_msgs_mocap_pose.pose.position.z = (float)extPose_crtp->poses[i].z/1000;
 
             float q[4];
             quatextract(extPose_crtp->poses[i].quat, q);
-            m_msgs_extPose.pose.orientation.x = q[0];
-            m_msgs_extPose.pose.orientation.y = q[1];
-            m_msgs_extPose.pose.orientation.z = q[2];
-            m_msgs_extPose.pose.orientation.w = q[3];
+            m_msgs_mocap_pose.pose.orientation.x = q[0];
+            m_msgs_mocap_pose.pose.orientation.y = q[1];
+            m_msgs_mocap_pose.pose.orientation.z = q[2];
+            m_msgs_mocap_pose.pose.orientation.w = q[3];
         }
     }
 }
@@ -284,18 +292,21 @@ void Client::uploadTrajectory(const uint8_t* data){
 
 void Client::startTrajectory(const uint8_t *data) {
     if(!m_haveTrajectory){
-        ROS_ERROR("[MAVSWARM_CLIENT] the trajectory is not updated yet");
+        ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, the trajectory is not updated yet");
         return;
     }
 
     auto cmd_startTraj_crtp = (crtpCommanderHighLevelStartTrajectoryRequest*)data;
     if(cmd_startTraj_crtp->relative){
-        ROS_ERROR("[MAVSWARM_CLIENT] relative trajectory is not supported yet");
+        ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, relative trajectory is not supported yet");
         return;
     }
     if(cmd_startTraj_crtp->reversed){
-        ROS_ERROR("[MAVSWARM_CLIENT] reverse trajectory is not supported yet");
+        ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, reverse trajectory is not supported yet");
         return;
+    }
+    if(!m_vision_pose_updated){
+        ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, vision_pose is not updated");
     }
 
     m_traj_start_time = ros::Time::now();
@@ -371,12 +382,12 @@ void Client::updateSetpoints(){
 void Client::takeoff(const uint8_t* data) {
     auto cmd_takeoff_crtp = (crtpCommanderHighLevelTakeoffRequest*)data;
 
-    if(!m_is_extPose_received){
-        ROS_WARN("[MAVSWARM_CLIENT] No external pose, do not takeoff");
+    if(!m_vision_pose_updated){
+        ROS_WARN("[MAVSWARM_CLIENT] No vision pose, do not takeoff");
         return;
     }
     // initialize setpoint
-    m_msgs_setpoint = m_msgs_extPose;
+    m_msgs_setpoint = m_msgs_vision_pose;
     m_msgs_setpoint.pose.position.z = cmd_takeoff_crtp->height;
     ROS_INFO_STREAM("[MAVSWARM_CLIENT] Initilize setpoint, x: " << m_msgs_setpoint.pose.position.x
                                                      << ", y: " << m_msgs_setpoint.pose.position.y
@@ -412,7 +423,7 @@ void Client::goTo(const uint8_t* data) {
         return;
     }
     if(m_startTrajectory){
-        ROS_ERROR("[MAVSWARM_CLIENT] goto failed, trajectory running");
+        ROS_ERROR("[MAVSWARM_CLIENT] goto failed, trajectory is running");
         return;
     }
 
@@ -451,7 +462,12 @@ void Client::goTo(const uint8_t* data) {
 void Client::land(const uint8_t* data){
     auto cmd_land_crtp = (crtpCommanderHighLevelLandRequest*)data;
 
-    m_msgs_setpoint = m_msgs_extPose;
+    if(!m_vision_pose_updated){
+        ROS_WARN("[MAVSWARM_CLIENT] No vision pose, do not land");
+        return;
+    }
+
+    m_msgs_setpoint = m_msgs_vision_pose;
     m_msgs_setpoint.pose.position.z = 0.00;
     ROS_INFO_STREAM("[MAVSWARM_CLIENT] Landing setpoint, x: " << m_msgs_setpoint.pose.position.x
                                                          << ", y: " << m_msgs_setpoint.pose.position.y
@@ -482,7 +498,7 @@ void Client::emergencyStop() {
     }
 }
 
-void Client::mavros_state_callback(const mavros_msgs::State::ConstPtr& msg){
+void Client::mavrosStateCallback(const mavros_msgs::State::ConstPtr& msg){
     m_current_state = *msg;
 }
 
@@ -491,29 +507,55 @@ void Client::publishMsgs(ros::Rate rate_max) {
         return;
     }
 
-    // publish external pose
-    m_pub_external_pose.publish(m_msgs_extPose);
+    // publish external pose from motion capture system
+    if(m_mocap_exist) {
+        m_pub_mocap_pose.publish(m_msgs_mocap_pose);
+    }
 
     // publish camera pose
-    tf::StampedTransform transform;
-    try {
-        tf_listener.lookupTransform("/camera_odom_frame", "/camera_pose_frame", ros::Time(0), transform);
+    if(m_camera_exist) {
+        tf::StampedTransform transform;
+        bool camera_pose_updated = false;
+        try {
+            tf_listener.lookupTransform("/camera_odom_frame", "/camera_pose_frame", ros::Time(0), transform);
+            m_msgs_camera_pose.header.stamp = ros::Time::now();
+            m_msgs_camera_pose.header.frame_id = m_frame_id;
+            m_msgs_camera_pose.pose.position.x = transform.getOrigin().x();
+            m_msgs_camera_pose.pose.position.y = transform.getOrigin().y();
+            m_msgs_camera_pose.pose.position.z = transform.getOrigin().z();
+            m_msgs_camera_pose.pose.orientation.x = transform.getRotation().x();
+            m_msgs_camera_pose.pose.orientation.y = transform.getRotation().y();
+            m_msgs_camera_pose.pose.orientation.z = transform.getRotation().z();
+            m_msgs_camera_pose.pose.orientation.w = transform.getRotation().w();
 
-        geometry_msgs::PoseStamped camera_pose;
-        camera_pose.header.stamp = ros::Time::now();
-        camera_pose.header.frame_id = m_frame_id;
-        camera_pose.pose.position.x = transform.getOrigin().x();
-        camera_pose.pose.position.y = transform.getOrigin().y();
-        camera_pose.pose.position.z = transform.getOrigin().z();
-        camera_pose.pose.orientation.x = transform.getRotation().x();
-        camera_pose.pose.orientation.y = transform.getRotation().y();
-        camera_pose.pose.orientation.z = transform.getRotation().z();
-        camera_pose.pose.orientation.w = transform.getRotation().w();
-
-        m_pub_camera_odom.publish(camera_pose);
+            m_pub_camera_odom.publish(m_msgs_camera_pose);
+            camera_pose_updated = true;
+        }
+        catch (tf::TransformException ex) {
+            camera_pose_updated = false;
+            ROS_ERROR("%s", ex.what());
+        }
+        if(m_use_vio) {
+            m_vision_pose_updated = camera_pose_updated;
+        }
     }
-    catch (tf::TransformException ex){
-        ROS_ERROR("%s",ex.what());
+
+    // publish vision pose for px4
+    if(m_camera_exist && m_use_vio){
+        m_msgs_vision_pose = m_msgs_camera_pose;
+    }
+    else if(m_mocap_exist && !m_use_vio){
+        m_msgs_vision_pose = m_msgs_mocap_pose;
+    }
+    else{
+        ROS_ERROR("[MAVSWARM_CLIENT] vision_pose is not published, check launch file param");
+    }
+
+    if(m_vision_pose_updated) {
+        m_pub_vision_pose.publish(m_msgs_vision_pose);
+    }
+    else{
+        ROS_WARN("[MAVSWARM_CLIENT] vision pose is not updated, do not publish vision pose");
     }
 
     // publish setpoint
@@ -546,7 +588,7 @@ void Client::quatextract(uint32_t quat, float* q){
     q[i_largest] = sqrt(1 - ssum);
 }
 
-bool Client::is_duplicated_message(const uint8_t *data) {
+bool Client::isDuplicatedMessage(const uint8_t *data) {
     bool ret = false;
     if(m_link != 0xFF){
         ret = (m_link == (data[0] & 0x0c));

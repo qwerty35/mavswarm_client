@@ -25,29 +25,40 @@
 
 class Client {
 public:
-    Client(const std::string& link_uri, int mav_id, const std::string& frame_id, int kill_switch_channel);
+    Client();
 
     void run();
 private:
-    int m_mavId;
+    //mav info
+    int m_mav_id;
     std::string m_frame_id;
+    bool m_mocap_exist;
+    bool m_camera_exist;
+    bool m_use_vio;
+    bool m_vision_pose_updated;
 
-    ros::NodeHandle m_rosNodeHandle;
-    ros::Publisher m_pub_external_pose;
+    //ros pub and sub
+    ros::NodeHandle m_nh;
+    ros::Publisher m_pub_mocap_pose;
     ros::Publisher m_pub_setpoint;
     ros::Publisher m_pub_setpoint_raw;
     ros::Publisher m_pub_camera_odom;
+    ros::Publisher m_pub_vision_pose;
     ros::Subscriber m_sub_current_state;
     ros::ServiceClient m_arming_client;
     ros::ServiceClient m_set_mode_client;
     ros::ServiceClient m_emergency_stop_client;
     tf::TransformListener tf_listener;
 
+    //ros msgs
     mavros_msgs::State m_current_state;
     geometry_msgs::PoseStamped m_msgs_setpoint;
     mavros_msgs::PositionTarget m_msgs_setpoint_raw;
-    geometry_msgs::PoseStamped m_msgs_extPose;
+    geometry_msgs::PoseStamped m_msgs_mocap_pose; //pose from motion capture system
+    geometry_msgs::PoseStamped m_msgs_camera_pose; //pose from depth camera
+    geometry_msgs::PoseStamped m_msgs_vision_pose; //if use_vio, it is camera_pose. else it is mocap_pose
 
+    //ros time info
     ros::Time m_last_pub_time;
     ros::Time m_traj_start_time;
     ros::Time m_latest_goto_time;
@@ -55,28 +66,25 @@ private:
     // trajectory
     std::vector<std::array<uint8_t, 24>> m_traj_rawdata;
     std::vector<Crazyflie::poly4d> m_traj_coef;
+    bool m_startTrajectory;
+    bool m_haveTrajectory;
 
     // crazyradio
     Crazyradio* m_radio;
-    int m_devId;
-    int m_kill_switch_channel;
-    ITransport* m_transport;
+    std::string m_mav_uri;
+    int m_dev_id;
     uint8_t m_channel;
     uint64_t m_address;
     Crazyradio::Datarate m_datarate;
     double m_link_quality;
     double m_link_rate;
     uint8_t m_link;
+    ITransport* m_transport;
 
-    // state
-    bool m_is_extPose_received;
-    bool m_startTrajectory;
-    bool m_haveTrajectory;
-
+    // functions
     void handleData(uint8_t* data);
     void publishMsgs(ros::Rate rate_max);
-
-    void receiveExternalPose(const uint8_t* data);
+    void receiveMocapPose(const uint8_t* data);
     void writeMemory(const uint8_t* data);
     void startTrajectory(const uint8_t* data);
     void uploadTrajectory(const uint8_t* data);
@@ -85,9 +93,8 @@ private:
     void land(const uint8_t* data);
     void emergencyStop();
     void updateSetpoints();
-
-    void mavros_state_callback(const mavros_msgs::State::ConstPtr& msg);
+    void mavrosStateCallback(const mavros_msgs::State::ConstPtr& msg);
     void quatextract(uint32_t quat, float* q);
-    bool is_duplicated_message(const uint8_t* data);
+    bool isDuplicatedMessage(const uint8_t* data);
 };
 
