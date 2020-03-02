@@ -30,11 +30,12 @@ public:
     void run();
 private:
     enum Mission{
-        LAND,
         NONE,
+        HOVER,
         TAKEOFF,
         GOTO,
         TRAJECTORY,
+        LAND,
     };
 
     //mav info

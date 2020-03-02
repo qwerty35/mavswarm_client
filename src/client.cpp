@@ -87,7 +87,7 @@ Client::Client()
     }
 
     // initialize mav info
-    m_current_mission = LAND;
+    m_current_mission = NONE;
     m_msgs_camera_pose.header.frame_id = m_frame_id;
     m_msgs_mocap_pose.header.frame_id = m_frame_id;
     m_vision_pose_updated = false;
@@ -283,7 +283,7 @@ void Client::uploadTrajectory(const uint8_t* data){
 }
 
 void Client::startTrajectory(const uint8_t *data) {
-    if(m_current_mission != NONE){
+    if(m_current_mission != HOVER){
         ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, mav is not ready");
         return;
     }
@@ -313,8 +313,8 @@ void Client::updateSetpoints(){
     double current_time = (ros::Time::now() - m_last_command_time).toSec();
 
     switch(m_current_mission){
-        case LAND:
         case NONE:
+        case HOVER:
             break;
         case TAKEOFF:
         case GOTO: {
@@ -331,7 +331,7 @@ void Client::updateSetpoints(){
             } else {
                 ROS_INFO("[MAVSWARM_CLIENT] mission complete");
                 m_msgs_setpoint.pose = m_desired_pose.pose;
-                m_current_mission = NONE;
+                m_current_mission = HOVER;
             }
             break;
         }
@@ -357,7 +357,7 @@ void Client::updateSetpoints(){
                 m_msgs_setpoint.pose.orientation = yaw2quat(m_msgs_setpoint_raw.yaw);
 
                 //initialize mission state
-                m_current_mission = NONE;
+                m_current_mission = HOVER;
 
                 return;
             } else {
@@ -388,13 +388,20 @@ void Client::updateSetpoints(){
             m_msgs_setpoint_raw.velocity.z = vz;
             break;
         }
+        case LAND: {
+            break;
+        }
     }
 }
 
 void Client::takeoff(const uint8_t* data) {
     auto cmd_takeoff_crtp = (crtpCommanderHighLevelTakeoffRequest*)data;
 
-    if(m_current_mission != LAND){
+    // prevent duplicated mission
+    if (ros::Time::now() - m_last_command_time < ros::Duration(0.05)) {
+        return;
+    }
+    if(m_current_mission != NONE){
         ROS_ERROR("[MAVSWARM_CLIENT] takeoff failed, mav is in air");
         return;
     }
@@ -402,7 +409,7 @@ void Client::takeoff(const uint8_t* data) {
         ROS_WARN("[MAVSWARM_CLIENT] takeoff failed, no vision pose");
         return;
     }
-
+    
     // initialize setpoint
     initializeSetpoint();
 
@@ -448,7 +455,7 @@ void Client::goTo(const uint8_t* data) {
     if (ros::Time::now() - m_last_command_time < ros::Duration(0.05)) {
         return;
     }
-    if(m_current_mission != NONE){
+    if(m_current_mission != HOVER){
         ROS_ERROR("[MAVSWARM_CLIENT] goto failed, mav is not ready");
         return;
     }
@@ -525,7 +532,7 @@ void Client::emergencyStop() {
         return;
     }
 
-    m_current_mission = LAND;
+    m_current_mission = NONE;
     m_last_command_time = ros::Time::now();
 }
 
