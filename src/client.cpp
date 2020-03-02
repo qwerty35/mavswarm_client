@@ -27,6 +27,7 @@ Client::Client()
         , m_address(0)
         , m_datarate(Crazyradio::Datarate_250KPS)
 {
+    // ros
     m_nh = ros::NodeHandle("~");
     m_pub_setpoint = m_nh.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
     m_pub_setpoint_raw = m_nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
@@ -46,18 +47,16 @@ Client::Client()
     m_nh.param<bool>("camera_exist", m_camera_exist, false);
     m_nh.param<bool>("use_vio", m_use_vio, false);
 
-    int datarate;
-    int channel;
+    // get radio info from uri
+    int datarate, channel;
     char datarateType;
     bool success = false;
-
     success = std::sscanf(m_mav_uri.c_str(), "radio://%d/%d/%d%c/%" SCNx64,
             &m_dev_id, &channel, &datarate,
             &datarateType, &m_address) == 5;
     if (!success) {
         throw std::runtime_error("Uri is not valid!");
     }
-
     if (success)
     {
         m_channel = channel;
@@ -87,20 +86,14 @@ Client::Client()
         }
     }
 
+    // initialize mav info
+    m_current_mission = LAND;
     m_msgs_camera_pose.header.frame_id = m_frame_id;
     m_msgs_mocap_pose.header.frame_id = m_frame_id;
     m_vision_pose_updated = false;
-    m_startTrajectory = false;
     m_haveTrajectory = false;
     m_link = 0xFF;
-    m_latest_goto_time = ros::Time::now();
-
-    // clear buffer
-    uint8_t data[32];
-    uint32_t length;
-    for(int i = 0; i < 10; i++) {
-        m_radio->receivePacket(data, length);
-    }
+    m_last_command_time = ros::Time::now();
 }
 
 void Client::run() {
@@ -281,7 +274,6 @@ void Client::uploadTrajectory(const uint8_t* data){
     m_traj_coef.resize(n_pieces);
     for(int i = 0; i < n_pieces; i++){
         m_traj_coef[i] = piece[i];
-        //ROS_INFO_STREAM("x"<< std::to_string(i) << ": " << m_traj_coef[i].p[0][0] << " " << m_traj_coef[i].p[0][1] << " " << m_traj_coef[i].p[0][2] << " " << m_traj_coef[i].p[0][3] << " " << m_traj_coef[i].p[0][4] << " " << m_traj_coef[i].p[0][5] << " " << m_traj_coef[i].p[0][6] << " " << m_traj_coef[i].p[0][7] );
         ROS_INFO_STREAM("T"<< std::to_string(i) << ": " << m_traj_coef[i].duration);
     }
 
@@ -291,6 +283,10 @@ void Client::uploadTrajectory(const uint8_t* data){
 }
 
 void Client::startTrajectory(const uint8_t *data) {
+    if(m_current_mission != NONE){
+        ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, mav is not ready");
+        return;
+    }
     if(!m_haveTrajectory){
         ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, the trajectory is not updated yet");
         return;
@@ -309,90 +305,108 @@ void Client::startTrajectory(const uint8_t *data) {
         ROS_ERROR("[MAVSWARM_CLIENT] start trajectory failed, vision_pose is not updated");
     }
 
-    m_traj_start_time = ros::Time::now();
-    m_startTrajectory = true;
+    m_last_command_time = ros::Time::now();
+    m_current_mission = TRAJECTORY;
 }
 
 void Client::updateSetpoints(){
-    if(!m_startTrajectory){
-        return;
-    }
-    double current_time = (ros::Time::now() - m_traj_start_time).toSec();
+    double current_time = (ros::Time::now() - m_last_command_time).toSec();
 
-    double t, seg_start_time = 0;
-    int m_curr;
-    // find segment start time;
-    for(int m = 0; m < m_traj_coef.size(); m++){
-        if(current_time > seg_start_time + m_traj_coef[m].duration){
-            seg_start_time += m_traj_coef[m].duration;
+    switch(m_current_mission){
+        case LAND:
+        case NONE:
+            break;
+        case TAKEOFF:
+        case GOTO: {
+            double remaining_time = (m_desired_pose.header.stamp - ros::Time::now()).toSec();
+            if (remaining_time > 0) {
+                // if remaining time exist, then linear interpolation
+                double alpha = current_time / (current_time + remaining_time);
+                m_msgs_setpoint.pose.position.x = (1-alpha) * m_start_pose.pose.position.x + alpha * m_desired_pose.pose.position.x;
+                m_msgs_setpoint.pose.position.y = (1-alpha) * m_start_pose.pose.position.y + alpha * m_desired_pose.pose.position.y;
+                m_msgs_setpoint.pose.position.z = (1-alpha) * m_start_pose.pose.position.z + alpha * m_desired_pose.pose.position.z;
+
+                double yaw = (1-alpha) * extractYaw(m_start_pose) + alpha * extractYaw(m_desired_pose);
+                m_msgs_setpoint.pose.orientation = yaw2quat(yaw);
+            } else {
+                ROS_INFO("[MAVSWARM_CLIENT] mission complete");
+                m_msgs_setpoint.pose = m_desired_pose.pose;
+                m_current_mission = NONE;
+            }
+            break;
         }
-        else{
-            m_curr = m;
+        case TRAJECTORY: {
+            double t, seg_start_time = 0;
+            int m_curr;
+            // find segment start time;
+            for (int m = 0; m < m_traj_coef.size(); m++) {
+                if (current_time > seg_start_time + m_traj_coef[m].duration) {
+                    seg_start_time += m_traj_coef[m].duration;
+                } else {
+                    m_curr = m;
+                    break;
+                }
+            }
+
+            // check trajectory is over
+            if (m_curr >= m_traj_coef.size()) {
+                ROS_INFO("[MAVSWARM_CLIENT] mission complete");
+
+                //reinitialize setpoint_position
+                m_msgs_setpoint.pose.position = m_msgs_setpoint_raw.position;
+                m_msgs_setpoint.pose.orientation = yaw2quat(m_msgs_setpoint_raw.yaw);
+
+                //initialize mission state
+                m_current_mission = NONE;
+
+                return;
+            } else {
+                t = current_time - seg_start_time;
+            }
+
+            double x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0, yaw = 0;
+            for (int i = 0; i < 8; i++) {
+                x += m_traj_coef[m_curr].p[0][i] * pow(t, i);
+                y += m_traj_coef[m_curr].p[1][i] * pow(t, i);
+                z += m_traj_coef[m_curr].p[2][i] * pow(t, i);
+                yaw += m_traj_coef[m_curr].p[3][i] * pow(t, i);
+
+                vx += i * m_traj_coef[m_curr].p[0][i] * pow(t, i - 1);
+                vy += i * m_traj_coef[m_curr].p[1][i] * pow(t, i - 1);
+                vz += i * m_traj_coef[m_curr].p[2][i] * pow(t, i - 1);
+            }
+
+            const uint16_t type_mask = (1 << 11) | (7 << 6); // with velocity
+//        const uint16_t type_mask = (1 << 11) | (7 << 6) | (7 << 3); //without velocity
+            m_msgs_setpoint_raw.type_mask = type_mask;
+            m_msgs_setpoint_raw.position.x = x;
+            m_msgs_setpoint_raw.position.y = y;
+            m_msgs_setpoint_raw.position.z = z;
+            m_msgs_setpoint_raw.yaw = yaw;
+            m_msgs_setpoint_raw.velocity.x = vx;
+            m_msgs_setpoint_raw.velocity.y = vy;
+            m_msgs_setpoint_raw.velocity.z = vz;
             break;
         }
     }
-
-    // check trajectory is over
-    if(m_curr >= m_traj_coef.size()){
-        m_startTrajectory = false;
-
-        ROS_INFO("[MAVSWARM_CLIENT] mission complete");
-
-        //reinitialize setpoint_position
-        m_msgs_setpoint.pose.position = m_msgs_setpoint_raw.position;
-        m_msgs_setpoint.pose.orientation.w = cos(m_msgs_setpoint_raw.yaw/2);
-        m_msgs_setpoint.pose.orientation.z = sin(m_msgs_setpoint_raw.yaw/2);
-
-        return;
-    }
-    else{
-        t = current_time - seg_start_time;
-    }
-
-    double x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0, yaw = 0;
-    for(int i = 0; i < 8; i++){
-        x += m_traj_coef[m_curr].p[0][i] * pow(t, i);
-        y += m_traj_coef[m_curr].p[1][i] * pow(t, i);
-        z += m_traj_coef[m_curr].p[2][i] * pow(t, i);
-        yaw += m_traj_coef[m_curr].p[3][i] * pow(t, i);
-
-        vx += i * m_traj_coef[m_curr].p[0][i] * pow(t, i-1);
-        vy += i * m_traj_coef[m_curr].p[1][i] * pow(t, i-1);
-        vz += i * m_traj_coef[m_curr].p[2][i] * pow(t, i-1);
-    }
-
-//    m_msgs_setpoint.pose.position.x = x;
-//    m_msgs_setpoint.pose.position.y = y;
-//    m_msgs_setpoint.pose.position.z = z;
-//    m_msgs_setpoint.pose.orientation.w = cos(yaw/2);
-//    m_msgs_setpoint.pose.orientation.z = sin(yaw/2);
-
-    const uint16_t type_mask = (1 << 11) | (7 << 6); // with velocity
-//    const uint16_t type_mask = (1 << 11) | (7 << 6) | (7 << 3); //without velocity
-    m_msgs_setpoint_raw.type_mask = type_mask;
-    m_msgs_setpoint_raw.position.x = x;
-    m_msgs_setpoint_raw.position.y = y;
-    m_msgs_setpoint_raw.position.z = z;
-    m_msgs_setpoint_raw.yaw = yaw;
-    m_msgs_setpoint_raw.velocity.x = vx;
-    m_msgs_setpoint_raw.velocity.y = vy;
-    m_msgs_setpoint_raw.velocity.z = vz;
 }
 
 void Client::takeoff(const uint8_t* data) {
     auto cmd_takeoff_crtp = (crtpCommanderHighLevelTakeoffRequest*)data;
 
-    if(!m_vision_pose_updated){
-        ROS_WARN("[MAVSWARM_CLIENT] No vision pose, do not takeoff");
+    if(m_current_mission != LAND){
+        ROS_ERROR("[MAVSWARM_CLIENT] takeoff failed, mav is in air");
         return;
     }
-    // initialize setpoint
-    m_msgs_setpoint = m_msgs_vision_pose;
-    m_msgs_setpoint.pose.position.z = cmd_takeoff_crtp->height;
-    ROS_INFO_STREAM("[MAVSWARM_CLIENT] Initilize setpoint, x: " << m_msgs_setpoint.pose.position.x
-                                                     << ", y: " << m_msgs_setpoint.pose.position.y
-                                                     << ", z: " << m_msgs_setpoint.pose.position.z);
+    if(!m_vision_pose_updated){
+        ROS_WARN("[MAVSWARM_CLIENT] takeoff failed, no vision pose");
+        return;
+    }
 
+    // initialize setpoint
+    initializeSetpoint();
+
+    // change to offboard mode
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
     if( m_current_state.mode != "OFFBOARD"){
@@ -405,6 +419,7 @@ void Client::takeoff(const uint8_t* data) {
     	}
     }
 
+    // arming
     mavros_msgs::CommandBool arm_cmd;
     arm_cmd.request.value = true;
     if( !m_current_state.armed ){
@@ -416,14 +431,25 @@ void Client::takeoff(const uint8_t* data) {
             return;
         }
     }
+
+    // initialize desired pose and start pose
+    m_start_pose = m_msgs_vision_pose;
+    m_desired_pose = m_msgs_vision_pose;
+    m_desired_pose.pose.position.z = cmd_takeoff_crtp->height;
+    m_desired_pose.header.stamp = ros::Time::now() + ros::Duration(cmd_takeoff_crtp->duration);
+
+    // mission -> Takeoff
+    m_current_mission = TAKEOFF;
+    m_last_command_time = ros::Time::now();
 }
 
 void Client::goTo(const uint8_t* data) {
-    if (ros::Time::now() - m_latest_goto_time < ros::Duration(0.05)) {
+    // prevent duplicated mission
+    if (ros::Time::now() - m_last_command_time < ros::Duration(0.05)) {
         return;
     }
-    if(m_startTrajectory){
-        ROS_ERROR("[MAVSWARM_CLIENT] goto failed, trajectory is running");
+    if(m_current_mission != NONE){
+        ROS_ERROR("[MAVSWARM_CLIENT] goto failed, mav is not ready");
         return;
     }
 
@@ -439,24 +465,23 @@ void Client::goTo(const uint8_t* data) {
         x = m_msgs_setpoint.pose.position.x + cmd_goto_crtp->x;
         y = m_msgs_setpoint.pose.position.y + cmd_goto_crtp->y;
         z = m_msgs_setpoint.pose.position.z + cmd_goto_crtp->z;
-        double q0 = m_msgs_setpoint.pose.orientation.w;
-        double q3 = m_msgs_setpoint.pose.orientation.z;
-        yaw = atan2(2 * q0 * q3, 1 - 2 * q3 * q3);
+        yaw = extractYaw(m_msgs_setpoint);
         yaw += cmd_goto_crtp->yaw;
     }
-    m_msgs_setpoint.pose.position.x = x;
-    m_msgs_setpoint.pose.position.y = y;
-    m_msgs_setpoint.pose.position.z = z;
-    m_msgs_setpoint.pose.orientation.w = cos(yaw / 2);
-    m_msgs_setpoint.pose.orientation.x = 0;
-    m_msgs_setpoint.pose.orientation.y = 0;
-    m_msgs_setpoint.pose.orientation.z = sin(yaw / 2);
+
+    m_start_pose = m_msgs_setpoint;
+    m_desired_pose.pose.position.x = x;
+    m_desired_pose.pose.position.y = y;
+    m_desired_pose.pose.position.z = z;
+    m_desired_pose.pose.orientation = yaw2quat(yaw);
+    m_desired_pose.header.stamp = ros::Time::now() + ros::Duration(cmd_goto_crtp->duration);
 
     ROS_INFO_STREAM("[MAVSWARM_CLIENT] go to setpoint, x: "   << x
                                                       << ", y: "   << y
                                                       << ", z: "   << z
                                                       << ", yaw: " << yaw);
-    m_latest_goto_time = ros::Time::now();
+    m_current_mission = GOTO;
+    m_last_command_time = ros::Time::now();
 }
 
 void Client::land(const uint8_t* data){
@@ -484,6 +509,9 @@ void Client::land(const uint8_t* data){
             return;
         }
     }
+
+    m_current_mission = LAND;
+    m_last_command_time = ros::Time::now();
 }
 
 void Client::emergencyStop() {
@@ -496,6 +524,9 @@ void Client::emergencyStop() {
         ROS_ERROR("[MAVSWARM_CLIENT] Emergency stop failed");
         return;
     }
+
+    m_current_mission = LAND;
+    m_last_command_time = ros::Time::now();
 }
 
 void Client::mavrosStateCallback(const mavros_msgs::State::ConstPtr& msg){
@@ -559,7 +590,7 @@ void Client::publishMsgs(ros::Rate rate_max) {
     }
 
     // publish setpoint
-    if(m_startTrajectory){
+    if(m_current_mission == TRAJECTORY){
         m_msgs_setpoint_raw.header.stamp = ros::Time::now();
         m_pub_setpoint_raw.publish(m_msgs_setpoint_raw);
     }
@@ -569,6 +600,21 @@ void Client::publishMsgs(ros::Rate rate_max) {
     }
 
     m_last_pub_time = ros::Time::now();
+}
+
+bool Client::isDuplicatedMessage(const uint8_t *data) {
+    bool ret = false;
+    if(m_link != 0xFF){
+        ret = (m_link == (data[0] & 0x0c));
+    }
+    return ret;
+}
+
+void Client::initializeSetpoint() {
+    m_msgs_setpoint = m_msgs_vision_pose;
+    ROS_INFO_STREAM("[MAVSWARM_CLIENT] Initilize setpoint, x: " << m_msgs_setpoint.pose.position.x
+                                                                << ", y: " << m_msgs_setpoint.pose.position.y
+                                                                << ", z: " << m_msgs_setpoint.pose.position.z);
 }
 
 void Client::quatextract(uint32_t quat, float* q){
@@ -588,12 +634,18 @@ void Client::quatextract(uint32_t quat, float* q){
     q[i_largest] = sqrt(1 - ssum);
 }
 
-bool Client::isDuplicatedMessage(const uint8_t *data) {
-    bool ret = false;
-    if(m_link != 0xFF){
-        ret = (m_link == (data[0] & 0x0c));
-    }
-    return ret;
+double Client::extractYaw(geometry_msgs::PoseStamped poseStamped){
+    double q0 = poseStamped.pose.orientation.w;
+    double q3 = poseStamped.pose.orientation.z;
+    return atan2(2 * q0 * q3, 1 - 2 * q3 * q3);
 }
 
+geometry_msgs::Quaternion Client::yaw2quat(double yaw){
+    geometry_msgs::Quaternion quat;
+    quat.w = cos(yaw / 2);
+    quat.x = 0;
+    quat.y = 0;
+    quat.z = sin(yaw / 2);
 
+    return quat;
+}

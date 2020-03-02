@@ -29,6 +29,14 @@ public:
 
     void run();
 private:
+    enum Mission{
+        LAND,
+        NONE,
+        TAKEOFF,
+        GOTO,
+        TRAJECTORY,
+    };
+
     //mav info
     int m_mav_id;
     std::string m_frame_id;
@@ -60,13 +68,14 @@ private:
 
     //ros time info
     ros::Time m_last_pub_time;
-    ros::Time m_traj_start_time;
-    ros::Time m_latest_goto_time;
+    ros::Time m_last_command_time;
 
-    // trajectory
+    // mission
+    Mission m_current_mission;
     std::vector<std::array<uint8_t, 24>> m_traj_rawdata;
     std::vector<Crazyflie::poly4d> m_traj_coef;
-    bool m_startTrajectory;
+    geometry_msgs::PoseStamped m_desired_pose; // GOTO, TAKEOFF
+    geometry_msgs::PoseStamped m_start_pose; // GOTO, TAKEOFF
     bool m_haveTrajectory;
 
     // crazyradio
@@ -94,7 +103,10 @@ private:
     void emergencyStop();
     void updateSetpoints();
     void mavrosStateCallback(const mavros_msgs::State::ConstPtr& msg);
-    void quatextract(uint32_t quat, float* q);
     bool isDuplicatedMessage(const uint8_t* data);
+    void initializeSetpoint();
+    void quatextract(uint32_t quat, float* q);
+    double extractYaw(geometry_msgs::PoseStamped poseStamped);
+    geometry_msgs::Quaternion yaw2quat(double yaw);
 };
 

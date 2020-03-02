@@ -5,8 +5,8 @@
     <arg name="mav_id"         default = "1"/>
     <arg name="frame_id"       default = "/world"/>
     <arg name="mocap_exist"    default = "true"/>
-    <arg name="camera_exist"   default = "true"/>
-    <arg name="use_vio"        default = "true"/>
+    <arg name="camera_exist"   default = "false"/>
+    <arg name="use_vio"        default = "false"/>
 
 
     <node name="client_node" pkg="mavswarm_client" type="client_node" output="screen">
